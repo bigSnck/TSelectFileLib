@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="t_item_checkCircle_backgroundColor">#1E8AE8</color>
+    <color name="t_item_checkCircle_borderColor">#FFFFFF</color>
+    <color name="t_check_original_radio_disable">#808080</color>
+
+
+    <color name="t_commom_text_black">#FF202020</color>
+
+    <color name="t_commom_text_withe">#E6E8F2</color>
+    <color name="t_commom_item_bg_grey">#FFE6E8F2</color>
+
+
+    <color name="preview_bottom_toolbar_bg">#CC000000</color>
+</resources>

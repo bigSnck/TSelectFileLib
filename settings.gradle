@@ -1,0 +1,2 @@
+include ':app', ':tselectlibrary'
+rootProject.name='TSelectFileLibrary'

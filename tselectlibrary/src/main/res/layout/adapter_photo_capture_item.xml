@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.yt.tselectlibrary.ui.widget.SquareRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/t_commom_text_withe">
+
+    <com.yt.tselectlibrary.ui.widget.SquareImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+         android:padding="2.5dp"
+        android:background="@color/t_commom_item_bg_grey"
+        android:scaleType="centerInside"
+        />
+
+    <TextView
+        android:id="@+id/item_tv_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:drawableTop="@drawable/ic_photo_camera_white_24dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="拍一张"
+        android:textColor="@color/t_check_original_radio_disable"
+        android:textSize="14sp" />
+</com.yt.tselectlibrary.ui.widget.SquareRelativeLayout>

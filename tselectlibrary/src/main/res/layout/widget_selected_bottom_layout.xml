@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+
+    <TextView
+        android:id="@+id/widget_tv_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textSize="16sp"
+        android:textColor="@color/t_commom_text_black"
+        android:padding="16dp"
+        android:alpha="0.5"
+        android:text="预览"
+    />
+
+
+    <LinearLayout
+        android:id="@+id/widget_ll_original"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:onClick="onOriginalClick"
+        android:orientation="horizontal">
+
+        <com.yt.tselectlibrary.ui.CheckRadioView
+            android:id="@+id/widget_cr_original"
+            android:layout_width="16dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_preview_radio_off"
+
+            android:layout_height="16dp">
+
+        </com.yt.tselectlibrary.ui.CheckRadioView>
+
+        <TextView
+            android:id="@+id/widget_tv_original"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:enabled="true"
+            android:paddingStart="4dp"
+            android:paddingLeft="4dp"
+            android:textColor="@color/t_commom_text_black"
+            android:textSize="14sp"
+            android:text="原图" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/widget_tv_select"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSelectedClick"
+        android:alpha="0.5"
+        android:padding="16dp"
+        android:layout_gravity="end"
+        android:textSize="16sp"
+        android:text="使用"
+        android:textColor="@color/t_item_checkCircle_backgroundColor" />
+</LinearLayout>
