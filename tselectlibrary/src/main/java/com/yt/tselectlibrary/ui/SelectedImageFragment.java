@@ -1,5 +1,6 @@
 package com.yt.tselectlibrary.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,13 +17,18 @@ import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.SelectImageAdapter;
 import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
 import com.yt.tselectlibrary.ui.bean.FileType;
-import com.yt.tselectlibrary.ui.bean.OnCamreCallback;
+import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
+import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
+import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
+
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
 import com.yt.tselectlibrary.ui.util.MediaStoreCompat;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +40,7 @@ public class SelectedImageFragment extends Fragment {
     private SelectImageAdapter mImageAdapter;
 
     private List<SelectFileEntity> mListData;
+    private List<SelectFileEntity> mSeleetedData;
 
     private OnUiSelectResultCallback mUiCallback;
     private boolean mIsShowCamra = false;//是否显示拍照
@@ -49,7 +56,7 @@ public class SelectedImageFragment extends Fragment {
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
         mMediaStoreCompat = new MediaStoreCompat(getActivity());
 
-        mMediaStoreCompat.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider","test"));
+        mMediaStoreCompat.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
 
         initData();
         initAdapter();
@@ -91,12 +98,27 @@ public class SelectedImageFragment extends Fragment {
             }
         });
 
-        mImageAdapter.setOnCamreCallback(new OnCamreCallback() {
+        mImageAdapter.setOnCamreCallback(new OnCameraCallback() {
             @Override
-            public void openCamrae() {
+            public void openCamera() {
                 openCapture();
             }
         });
+
+        mImageAdapter.setOnPreViewCallback(new OnPreViewCallback() {
+            @Override
+            public void openPreView(int postion) {
+
+                goIntent(postion);
+            }
+        });
+    }
+
+    private void goIntent(int postion) {
+
+        EventBus.getDefault().postSticky(new PreviewDataEvent(mListData,mSeleetedData,postion));
+        Intent intent = new Intent(getActivity(), PreviewFileActivity.class);
+        startActivity(intent);
     }
 
     private void openCapture() {
@@ -109,6 +131,7 @@ public class SelectedImageFragment extends Fragment {
         //更新一下底部的按钮
 
         if (null != mUiCallback) {
+            mSeleetedData=list;
             mUiCallback.selected(list, count, FileType.IMAGE);
         }
     }
@@ -116,4 +139,6 @@ public class SelectedImageFragment extends Fragment {
     public void setOnUiSelectResultCallback(OnUiSelectResultCallback callback) {
         mUiCallback = callback;
     }
+
+
 }

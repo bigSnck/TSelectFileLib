@@ -114,7 +114,6 @@ public class CheckView extends View {
         }*/
         mCheckedNum = checkedNum;
 
-        Log.e("AAA","--------------->>>>>>>1="+mCheckedNum);
         invalidate();
     }
 
@@ -137,7 +136,6 @@ public class CheckView extends View {
         // draw white stroke
         canvas.drawCircle((float) SIZE * mDensity / 2, (float) SIZE * mDensity / 2,
                 STROKE_RADIUS * mDensity, mStrokePaint);
-        Log.e("AAA","--------------->>>>>>>2"+mCountable);
         // draw content
         if (mCountable) {
             if (mCheckedNum != UNCHECKED) {
@@ -151,7 +149,6 @@ public class CheckView extends View {
                 canvas.drawText(text, baseX, baseY, mTextPaint);
             }
 
-            Log.e("AAA","--------------->>>>>>>"+"画文字");
         } else {
             if (mChecked) {
                 initBackgroundPaint();
@@ -161,7 +158,6 @@ public class CheckView extends View {
                 mCheckDrawable.setBounds(getCheckRect());
                 mCheckDrawable.draw(canvas);
             }
-            Log.e("AAA","--------------->>>>>>>"+"画图形"+mChecked);
         }
 
         // enable hint

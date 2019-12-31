@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.os.Parcelable;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -11,14 +13,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.yt.tselectlibrary.ui.PreviewFileActivity;
 import com.yt.tselectlibrary.ui.SelectedImageFragment;
 import com.yt.tselectlibrary.ui.bean.FileType;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
+
+import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
+import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import pub.devrel.easypermissions.AppSettingsDialog;

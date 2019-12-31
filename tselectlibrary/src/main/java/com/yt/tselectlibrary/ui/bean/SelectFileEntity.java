@@ -1,6 +1,9 @@
 package com.yt.tselectlibrary.ui.bean;
 
-public class SelectFileEntity {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class SelectFileEntity implements Parcelable {
     private boolean isSelected;//是否选中状态 false:未选中 true:选中状态
     private String originalPath;//源文件路径
     private String compressPath;//压缩后的文件路径
@@ -76,4 +79,42 @@ public class SelectFileEntity {
     public void setFileType(FileType fileType) {
         this.fileType = fileType;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte(this.isSelected ? (byte) 1 : (byte) 0);
+        dest.writeString(this.originalPath);
+        dest.writeString(this.compressPath);
+        dest.writeInt(this.fileType == null ? -1 : this.fileType.ordinal());
+        dest.writeInt(this.idInt);
+        dest.writeInt(this.selectIndex);
+    }
+
+    protected SelectFileEntity(Parcel in) {
+        this.isSelected = in.readByte() != 0;
+        this.originalPath = in.readString();
+        this.compressPath = in.readString();
+        int tmpFileType = in.readInt();
+        this.fileType = tmpFileType == -1 ? null : FileType.values()[tmpFileType];
+        this.idInt = in.readInt();
+        this.selectIndex = in.readInt();
+    }
+
+    public static final Parcelable.Creator<SelectFileEntity> CREATOR = new Parcelable.Creator<SelectFileEntity>() {
+        @Override
+        public SelectFileEntity createFromParcel(Parcel source) {
+            return new SelectFileEntity(source);
+        }
+
+        @Override
+        public SelectFileEntity[] newArray(int size) {
+            return new SelectFileEntity[size];
+        }
+    };
 }

@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
+
     android:layout_height="match_parent">
 
     <com.yt.tselectlibrary.ui.widget.PreviewViewPager
-        android:id="@+id/pager"
+        android:id="@+id/preview_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black" />
+        android:layout_height="match_parent" />
 
     <com.yt.tselectlibrary.ui.widget.SelectBottomView
-        android:id="@+id/s_file_sbv"
+        android:id="@+id/preview_file_sbv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></com.yt.tselectlibrary.ui.widget.SelectBottomView>
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/preview_bottom_toolbar_bg"
+        android:gravity="bottom"></com.yt.tselectlibrary.ui.widget.SelectBottomView>
 
     <FrameLayout
-        android:id="@+id/top_toolbar"
+        android:id="@+id/preview_top_toolbar"
         android:layout_width="wrap_content"
+        android:clickable="true"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_margin="8dp"
         android:fitsSystemWindows="true">
 
         <com.yt.tselectlibrary.ui.widget.CheckView
-            android:id="@+id/check_view"
+            android:id="@+id/preview_check_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp" />

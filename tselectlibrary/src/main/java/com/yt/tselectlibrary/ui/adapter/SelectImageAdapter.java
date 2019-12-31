@@ -2,6 +2,7 @@ package com.yt.tselectlibrary.ui.adapter;
 
 import android.content.Context;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,8 +12,9 @@ import com.yt.baseadapterlibrary.TBaseAdapter;
 import com.yt.baseadapterlibrary.view.MultiTypeSupport;
 import com.yt.baseadapterlibrary.view.ViewHolder;
 import com.yt.tselectlibrary.R;
-import com.yt.tselectlibrary.ui.bean.OnCamreCallback;
+import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
+import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.widget.CheckView;
 
@@ -24,7 +26,8 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
     private List<SelectFileEntity> mSelectedArray;
     private int mSelectStyle = 1;//表示有右上角的数字
     private OnSelectedFileResultCallback mOnSelectedFileResultCallback;
-    private OnCamreCallback mOnCamreCallback;
+    private OnCameraCallback mOnCameraCallback;
+    private OnPreViewCallback mOnPreViewCallback;
 
     public SelectImageAdapter(Context context, List<SelectFileEntity> data) {
         super(context, data, new MultiTypeSupport<SelectFileEntity>() {
@@ -39,12 +42,12 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
             }
         });
 
-        mSelectedArray=new ArrayList<>();
+        mSelectedArray = new ArrayList<>();
 
     }
 
     @Override
-    public void convert(ViewHolder holder, final SelectFileEntity selectFileEntity) {
+    public void convert(final ViewHolder holder, final SelectFileEntity selectFileEntity) {
 
 
         if (selectFileEntity.getIdInt() == -1) {//触发拍照按钮
@@ -52,8 +55,8 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
             itemTvHint.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mOnCamreCallback != null) {
-                        mOnCamreCallback.openCamrae();
+                    if (mOnCameraCallback != null) {
+                        mOnCameraCallback.openCamera();
                     }
                 }
             });
@@ -66,6 +69,18 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
                     .centerCrop()
                     .into(imageView);
 
+
+            checkView.setChecked(selectFileEntity.isSelected());
+
+            if (mSelectStyle == 1) {
+                checkView.setCheckedNum(selectFileEntity.getSelectIndex());
+                if (selectFileEntity.isSelected()) {
+                    checkView.setCountable(true);
+                } else {
+                    checkView.setCountable(false);
+                }
+            }
+
             checkView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -77,16 +92,18 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
                     notifyDataSetChanged();
                 }
             });
-            checkView.setChecked(selectFileEntity.isSelected());
 
-            if (mSelectStyle == 1) {
-                checkView.setCheckedNum(selectFileEntity.getSelectIndex());
-                if (selectFileEntity.isSelected()) {
-                    checkView.setCountable(true);
-                } else {
-                    checkView.setCountable(false);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if (mOnPreViewCallback != null) {
+                        Log.i("AA","数据=adapter"+holder.getAdapterPosition());
+
+                        mOnPreViewCallback.openPreView(holder.getAdapterPosition());
+                    }
                 }
-            }
+            });
 
         }
 
@@ -116,8 +133,13 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
         mOnSelectedFileResultCallback = callback;
     }
 
-    public void setOnCamreCallback(OnCamreCallback callback) {
-        mOnCamreCallback = callback;
+    public void setOnCamreCallback(OnCameraCallback callback) {
+        mOnCameraCallback = callback;
+    }
+
+
+    public void setOnPreViewCallback(OnPreViewCallback callback) {
+        mOnPreViewCallback = callback;
     }
 
 }
