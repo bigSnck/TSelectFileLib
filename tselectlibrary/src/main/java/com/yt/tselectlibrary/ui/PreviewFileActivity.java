@@ -17,8 +17,11 @@ import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.PreviewPagerAdapter;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 
+import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
+import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 import com.yt.tselectlibrary.ui.event.ClickPreviewImageEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
+import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.widget.CheckView;
 import com.yt.tselectlibrary.ui.widget.PreviewViewPager;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
@@ -73,6 +76,7 @@ public class PreviewFileActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 mPostion = position;
+                updataTopShow(mList.get(mPostion));
             }
 
             @Override
@@ -108,6 +112,16 @@ public class PreviewFileActivity extends AppCompatActivity {
             }
         });
 
+
+        mSelectBottomView.setOnViewClickCallback(new OnViewClickCallback() {
+            @Override
+            public void selected(SelectedViewType selectedViewType) {
+                if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
+                    EventBus.getDefault().postSticky(new SelectDataEvent(mList,mSelecedData,mPostion));
+                    finish();
+                }
+            }
+        });
     }
 
     private void setTopView() {
@@ -116,7 +130,7 @@ public class PreviewFileActivity extends AppCompatActivity {
         final SelectFileEntity entity = mList.get(mPostion);
 
         if (entity.isSelected()) {
-            mIsChecked=true;
+            mIsChecked = true;
             mCheckView.setCountable(true);
             mCheckView.setCheckedNum(entity.getSelectIndex());
         }
@@ -136,34 +150,38 @@ public class PreviewFileActivity extends AppCompatActivity {
      */
     private void upDataTopView(SelectFileEntity entity) {
 
-        if (mSelecedData != null && mSelecedData.isEmpty()) {
-            //如果一开始选了，那就走这
+        if (!mSelecedData.isEmpty()) {
+
             if (mSelecedData.contains(entity)) {
-                mSelecedData.remove(mPostion);
+                mSelecedData.remove(entity);
             } else {
-                entity.setSelected(!entity.isSelected());
-                mList.get(mPostion).setSelected(entity.isSelected());
                 mSelecedData.add(entity);
             }
+        } else {
+            mSelecedData.add(entity);
+
         }
-        if(mSelecedData.isEmpty()){
-            entity.setSelected(!entity.isSelected());
-            mList.get(mPostion).setSelected(entity.isSelected());
-            mSelecedData.add(entity);//如果一开始一个都没选，那就走这
-        }
+        entity.setSelected(!entity.isSelected());
+
 
         for (int i = 0; i < mSelecedData.size(); i++) {
             mSelecedData.get(i).setSelectIndex(i + 1);
         }
 
-        if(entity.isSelected()){
-            Log.i("AA","lla"+"进来了");
+        updataTopShow(entity);
+    }
+
+    private void updataTopShow(SelectFileEntity entity) {
+        if (entity.isSelected()) {
+            Log.i("AA", "lla" + "进来了");
 
             mCheckView.setCountable(true);
-            mCheckView.setCheckedNum(mSelecedData.size());
-        }else {
+            mCheckView.setCheckedNum(entity.getSelectIndex());
+        } else {
+            mCheckView.setCountable(false);
             mCheckView.setChecked(false);
-            Log.i("AA","llb"+"进来了");
+
+            Log.i("AA", "llb" + "进来了");
         }
 
     }
@@ -175,6 +193,7 @@ public class PreviewFileActivity extends AppCompatActivity {
         mTvPreviewView.setText("返回");
         mTvPreviewView.setAlpha(1);
         mOriginalView.setTextColor(getResources().getColor(R.color.t_commom_text_withe));
+
 
     }
 
