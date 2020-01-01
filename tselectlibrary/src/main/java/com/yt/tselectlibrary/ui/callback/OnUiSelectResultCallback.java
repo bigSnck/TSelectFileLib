@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OnUiSelectResultCallback {
 
-    void selected(List<SelectFileEntity> list, int count, FileType fileType);
+    void selected(List<SelectFileEntity> allList,List<SelectFileEntity> selectedFileList, int count, FileType fileType);
 }

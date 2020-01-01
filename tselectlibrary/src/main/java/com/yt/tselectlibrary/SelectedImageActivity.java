@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 
-import android.os.Parcelable;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -13,7 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.yt.tselectlibrary.ui.PreviewFileActivity;
+import com.yt.tselectlibrary.ui.FilePreviewActivity;
+import com.yt.tselectlibrary.ui.SelectedFilePreviewActivity;
 import com.yt.tselectlibrary.ui.SelectedImageFragment;
 import com.yt.tselectlibrary.ui.bean.FileType;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
@@ -21,15 +20,12 @@ import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
+import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
-import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -41,6 +37,8 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
     private SelectBottomView mBottomView;
 
     private SelectedImageFragment mImagefragment;
+    private List<SelectFileEntity> mSelectFileList;
+    private List<SelectFileEntity> mAllList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,13 +53,20 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
             @Override
             public void selected(SelectedViewType selectedViewType) {
 
+                if(null!=mSelectFileList){
+                    if(selectedViewType==SelectedViewType.PREVIEW_VIEW){
+                        goIntent();
+                    }
+                }
             }
         });
 
         mImagefragment = new SelectedImageFragment();
         mImagefragment.setOnUiSelectResultCallback(new OnUiSelectResultCallback() {
             @Override
-            public void selected(List<SelectFileEntity> list, int count, FileType fileType) {
+            public void selected(List<SelectFileEntity> allList, List<SelectFileEntity> selectedFileList, int count, FileType fileType) {
+                mSelectFileList=selectedFileList;
+                mAllList=allList;
                 mBottomView.upDataSelectedFileCount(count);
             }
         });
@@ -125,5 +130,12 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
 
     }
 
+
+    private void goIntent() {
+
+        EventBus.getDefault().postSticky(new FilePreviewDataEvent(mAllList, mSelectFileList));
+        Intent intent = new Intent(this, SelectedFilePreviewActivity.class);
+        startActivity(intent);
+    }
 
 }

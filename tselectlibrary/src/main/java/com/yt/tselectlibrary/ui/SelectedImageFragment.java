@@ -23,12 +23,16 @@ import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
 import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
+import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 
+import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
 import com.yt.tselectlibrary.ui.util.MediaStoreCompat;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +47,7 @@ public class SelectedImageFragment extends Fragment {
     private List<SelectFileEntity> mSeleetedData;
 
     private OnUiSelectResultCallback mUiCallback;
-    private boolean mIsShowCamra = false;//是否显示拍照
+    private boolean mIsShowCamra = true;//是否显示拍照
     private MediaStoreCompat mMediaStoreCompat;
     public final int REQUEST_CODE_CAPTURE = 24;
 
@@ -60,6 +64,7 @@ public class SelectedImageFragment extends Fragment {
 
         initData();
         initAdapter();
+
 
 
         return mView;
@@ -116,8 +121,12 @@ public class SelectedImageFragment extends Fragment {
 
     private void goIntent(int postion) {
 
-        EventBus.getDefault().postSticky(new PreviewDataEvent(mListData,mSeleetedData,postion));
-        Intent intent = new Intent(getActivity(), PreviewFileActivity.class);
+        if (mIsShowCamra) {
+            mListData.remove(0);
+            postion = postion - 1;
+        }
+        EventBus.getDefault().postSticky(new PreviewDataEvent(mListData, mSeleetedData, postion));
+        Intent intent = new Intent(getActivity(), FilePreviewActivity.class);
         startActivity(intent);
     }
 
@@ -131,7 +140,7 @@ public class SelectedImageFragment extends Fragment {
         //更新一下底部的按钮
 
         if (null != mUiCallback) {
-            mSeleetedData=list;
+            mSeleetedData = list;
             mUiCallback.selected(list, count, FileType.IMAGE);
         }
     }
@@ -141,4 +150,42 @@ public class SelectedImageFragment extends Fragment {
     }
 
 
+    /**
+     * 来自预览选泽的图片
+     *
+     * @param event
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onSelectedFileEvent(SelectDataEvent event) {
+
+
+        mListData = event.getList();
+        if (mIsShowCamra) {
+            mListData.add(0, new SelectFileEntity(-1));
+        }
+        mImageAdapter.notifyDataSetChanged();
+
+        if (null != mUiCallback) {
+
+            mSeleetedData = event.getmSelectedList();
+            mUiCallback.selected(mSeleetedData, mSeleetedData.size(), FileType.IMAGE);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!EventBus.getDefault().isRegistered(this)) {//加上判断
+            EventBus.getDefault().register(this);
+        }
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+        if (EventBus.getDefault().isRegistered(this))//加上判断
+            EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
 }

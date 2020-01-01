@@ -2,7 +2,6 @@ package com.yt.tselectlibrary.ui;
 
 
 import android.os.Bundle;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -16,10 +15,10 @@ import androidx.viewpager.widget.ViewPager;
 import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.PreviewPagerAdapter;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
-
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 import com.yt.tselectlibrary.ui.event.ClickPreviewImageEvent;
+import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.widget.CheckView;
@@ -32,7 +31,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
-public class PreviewFileActivity extends AppCompatActivity {
+public class SelectedFilePreviewActivity extends AppCompatActivity {
 
     private PreviewViewPager mPreviewViewPager;
     private SelectBottomView mSelectBottomView;
@@ -48,8 +47,9 @@ public class PreviewFileActivity extends AppCompatActivity {
     private boolean mIsShow = true;//是否显示操作按钮
     private List<SelectFileEntity> mSelecedData;
 
+    private List<SelectFileEntity> mAllList;
 
-    private boolean mIsChecked;//是否选中状态
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,7 +87,6 @@ public class PreviewFileActivity extends AppCompatActivity {
 
         setBottomView();
         setTopView();
-        Log.i("AA", "数据=" + mPostion);
     }
 
     private void initView() {
@@ -117,7 +116,7 @@ public class PreviewFileActivity extends AppCompatActivity {
             @Override
             public void selected(SelectedViewType selectedViewType) {
                 if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
-                    EventBus.getDefault().postSticky(new SelectDataEvent(mList,mSelecedData,mPostion));
+                    EventBus.getDefault().postSticky(new FilePreviewDataEvent(mSelecedData));
                     finish();
                 }
             }
@@ -130,7 +129,7 @@ public class PreviewFileActivity extends AppCompatActivity {
         final SelectFileEntity entity = mList.get(mPostion);
 
         if (entity.isSelected()) {
-            mIsChecked = true;
+
             mCheckView.setCountable(true);
             mCheckView.setCheckedNum(entity.getSelectIndex());
         }
@@ -153,6 +152,9 @@ public class PreviewFileActivity extends AppCompatActivity {
         if (!mSelecedData.isEmpty()) {
 
             if (mSelecedData.contains(entity)) {
+                if(mAllList.contains(entity)){
+
+                }
                 mSelecedData.remove(entity);
             } else {
                 mSelecedData.add(entity);
@@ -168,12 +170,13 @@ public class PreviewFileActivity extends AppCompatActivity {
             mSelecedData.get(i).setSelectIndex(i + 1);
         }
 
+
+
         updataTopShow(entity);
     }
 
     private void updataTopShow(SelectFileEntity entity) {
         if (entity.isSelected()) {
-            Log.i("AA", "lla" + "进来了");
 
             mCheckView.setCountable(true);
             mCheckView.setCheckedNum(entity.getSelectIndex());
@@ -181,7 +184,6 @@ public class PreviewFileActivity extends AppCompatActivity {
             mCheckView.setCountable(false);
             mCheckView.setChecked(false);
 
-            Log.i("AA", "llb" + "进来了");
         }
 
     }
@@ -198,10 +200,11 @@ public class PreviewFileActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void getFileDataEvent(PreviewDataEvent event) {
-        mList = event.getList();
-        mPostion = event.getPosition();
-        mSelecedData = event.getmSelectedList();
+    public void getFilePreviewDataEvent(FilePreviewDataEvent event) {
+        mList = event.getSelectedList();
+        mPostion = 0;//默认第一张
+        mSelecedData = event.getSelectedList();
+        mAllList=event.getList();
 
         initAdapter();
     }
