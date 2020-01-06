@@ -28,7 +28,7 @@
         android:onClick="onOriginalClick"
         android:orientation="horizontal">
 
-        <com.yt.tselectlibrary.ui.CheckRadioView
+        <com.yt.tselectlibrary.ui.widget.CheckRadioView
             android:id="@+id/widget_cr_original"
             android:layout_width="16dp"
             android:layout_gravity="center_vertical"
@@ -36,7 +36,7 @@
 
             android:layout_height="16dp">
 
-        </com.yt.tselectlibrary.ui.CheckRadioView>
+        </com.yt.tselectlibrary.ui.widget.CheckRadioView>
 
         <TextView
             android:id="@+id/widget_tv_original"

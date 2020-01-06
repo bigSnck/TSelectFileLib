@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.core.content.FileProvider;
 import androidx.core.os.EnvironmentCompat;
@@ -73,12 +74,48 @@ public class MediaStoreCompat {
         mCaptureStrategy = strategy;
     }
 
-    public void dispatchCaptureIntent(Context context, int requestCode) {
+    public void dispatchImageIntent(Context context, int requestCode) {
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (captureIntent.resolveActivity(context.getPackageManager()) != null) {
             File photoFile = null;
             try {
                 photoFile = createImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (photoFile != null) {
+                mCurrentPhotoPath = photoFile.getAbsolutePath();
+                mCurrentPhotoUri = FileProvider.getUriForFile(mContext.get(),
+                        mCaptureStrategy.authority, photoFile);
+                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
+                captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                captureIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    List<ResolveInfo> resInfoList = context.getPackageManager()
+                            .queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                    for (ResolveInfo resolveInfo : resInfoList) {
+                        String packageName = resolveInfo.activityInfo.packageName;
+                        context.grantUriPermission(packageName, mCurrentPhotoUri,
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+                }
+                if (mFragment != null) {
+                    mFragment.get().startActivityForResult(captureIntent, requestCode);
+                } else {
+                    mContext.get().startActivityForResult(captureIntent, requestCode);
+                }
+
+            }
+        }
+    }
+    public void dispatchVideoIntent(Context context, int requestCode) {
+        Intent captureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        captureIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        if (captureIntent.resolveActivity(context.getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createVideoFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -98,10 +135,15 @@ public class MediaStoreCompat {
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     }
                 }
+
+                Log.i("AA","视频位置="+mCurrentPhotoPath);
                 if (mFragment != null) {
+                    Log.i("AA","视频位置="+mCurrentPhotoPath);
                     mFragment.get().startActivityForResult(captureIntent, requestCode);
+
                 } else {
                     mContext.get().startActivityForResult(captureIntent, requestCode);
+                    Log.i("AA","视频位置="+mCurrentPhotoPath);
                 }
             }
         }
@@ -137,6 +179,36 @@ public class MediaStoreCompat {
         return tempFile;
     }
 
+    private File createVideoFile() throws IOException {
+        // Create an image file name
+        String timeStamp =
+                new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = String.format("VIDEO_%s.mp4", timeStamp);
+        File storageDir;
+        if (mCaptureStrategy.isPublic) {
+            storageDir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES);
+            if (!storageDir.exists()) storageDir.mkdirs();
+        } else {
+            storageDir = mContext.get().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        }
+        if (mCaptureStrategy.directory != null) {
+            storageDir = new File(storageDir, mCaptureStrategy.directory);
+            if (!storageDir.exists()) storageDir.mkdirs();
+        }
+
+        // Avoid joining path components manually
+        File tempFile = new File(storageDir, imageFileName);
+
+        // Handle the situation that user's external storage is not ready
+        if (!Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(tempFile))) {
+            return null;
+        }
+
+        return tempFile;
+    }
+
+
     public Uri getCurrentPhotoUri() {
         return mCurrentPhotoUri;
     }
@@ -144,4 +216,5 @@ public class MediaStoreCompat {
     public String getCurrentPhotoPath() {
         return mCurrentPhotoPath;
     }
+
 }

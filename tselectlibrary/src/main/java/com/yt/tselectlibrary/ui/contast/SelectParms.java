@@ -1,5 +1,6 @@
 package com.yt.tselectlibrary.ui.contast;
 
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,13 +9,30 @@ public class SelectParms implements Parcelable {
     private int maxCount;
     private boolean single;
     private FileType fileType;
-    private int resultCode;
+    private SelectedStyleType mStyleType;
 
-    public SelectParms(int maxCount, boolean single, FileType fileType, int resultCode) {
+    private boolean isShowCamra;
+
+
+    public SelectParms(int maxCount, boolean single, FileType fileType) {
         this.maxCount = maxCount;
         this.single = single;
         this.fileType = fileType;
-        this.resultCode = resultCode;
+    }
+
+    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType mStyleType) {
+        this.maxCount = maxCount;
+        this.single = single;
+        this.fileType = fileType;
+        this.mStyleType = mStyleType;
+    }
+
+    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType mStyleType, boolean isShowCamra) {
+        this.maxCount = maxCount;
+        this.single = single;
+        this.fileType = fileType;
+        this.mStyleType = mStyleType;
+        this.isShowCamra = isShowCamra;
     }
 
     public int getMaxCount() {
@@ -32,11 +50,17 @@ public class SelectParms implements Parcelable {
         return fileType;
     }
 
-
-    public int getResultCode() {
-        return resultCode;
+    public SelectedStyleType getmStyleType() {
+        return mStyleType;
     }
 
+    public boolean isShowCamra() {
+        return isShowCamra;
+    }
+
+    public void setShowCamra(boolean showCamra) {
+        isShowCamra = showCamra;
+    }
 
     @Override
     public int describeContents() {
@@ -48,7 +72,8 @@ public class SelectParms implements Parcelable {
         dest.writeInt(this.maxCount);
         dest.writeByte(this.single ? (byte) 1 : (byte) 0);
         dest.writeInt(this.fileType == null ? -1 : this.fileType.ordinal());
-        dest.writeInt(this.resultCode);
+        dest.writeInt(this.mStyleType == null ? -1 : this.mStyleType.ordinal());
+        dest.writeByte(this.isShowCamra ? (byte) 1 : (byte) 0);
     }
 
     protected SelectParms(Parcel in) {
@@ -56,7 +81,9 @@ public class SelectParms implements Parcelable {
         this.single = in.readByte() != 0;
         int tmpFileType = in.readInt();
         this.fileType = tmpFileType == -1 ? null : FileType.values()[tmpFileType];
-        this.resultCode = in.readInt();
+        int tmpMStyleType = in.readInt();
+        this.mStyleType = tmpMStyleType == -1 ? null : SelectedStyleType.values()[tmpMStyleType];
+        this.isShowCamra = in.readByte() != 0;
     }
 
     public static final Parcelable.Creator<SelectParms> CREATOR = new Parcelable.Creator<SelectParms>() {

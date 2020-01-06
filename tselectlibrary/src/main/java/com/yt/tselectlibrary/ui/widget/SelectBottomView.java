@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.yt.tselectlibrary.R;
-import com.yt.tselectlibrary.ui.CheckRadioView;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
@@ -113,6 +112,13 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
         }
     }
 
+    public void setLLOraiginalView(int visibility) {
+        if(mLLOriginal!=null){
+            mLLOriginal.setVisibility(visibility);
+        }
+    }
+
+
     /**
      * 更新ViewState
      */
@@ -142,7 +148,7 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
         setAlpha(mTvPreview, 0.5f, 1f);
         setAlpha(mTvSelect, 0.5f, 1f);
 
-        if (mCount > 0) {
+        if (mCount >= 0) {
             mTvSelect.setText("使用(" + mCount + ")");
         }
     }

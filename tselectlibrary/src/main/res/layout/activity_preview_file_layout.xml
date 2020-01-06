@@ -12,8 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-
-
     <com.yt.tselectlibrary.ui.widget.SelectBottomView
         android:id="@+id/preview_file_sbv"
         android:layout_width="match_parent"

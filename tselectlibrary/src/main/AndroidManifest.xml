@@ -9,7 +9,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="com.yt.tselectlibrary.SelectedImageActivity"
+            android:name="com.yt.tselectlibrary.SelectedFileActivity"
 
             android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
         <activity

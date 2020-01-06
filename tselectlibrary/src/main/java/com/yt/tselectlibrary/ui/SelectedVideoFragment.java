@@ -2,6 +2,7 @@ package com.yt.tselectlibrary.ui;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,21 +17,22 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yt.tselectlibrary.R;
+import com.yt.tselectlibrary.ui.FilePreviewActivity;
 import com.yt.tselectlibrary.ui.adapter.SelectImageAdapter;
+import com.yt.tselectlibrary.ui.adapter.SelectVideoAdapter;
 import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
-import com.yt.tselectlibrary.ui.callback.OnNotSelectCallback;
-import com.yt.tselectlibrary.ui.contast.FileType;
-import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
+import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
+import com.yt.tselectlibrary.ui.callback.OnNotSelectCallback;
 import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
+import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.contast.SelectParms;
 import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.event.Preview2SelecedDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
-
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
 import com.yt.tselectlibrary.ui.util.MediaStoreCompat;
@@ -43,11 +45,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectedImageFragment extends Fragment {
+public class SelectedVideoFragment extends Fragment {
 
     private View mView;
     private RecyclerView mRlv;
-    private SelectImageAdapter mImageAdapter;
+    private SelectVideoAdapter mVideoAdapter;
 
     private List<SelectFileEntity> mListData;
     private List<SelectFileEntity> mSeleetedData;
@@ -79,6 +81,7 @@ public class SelectedImageFragment extends Fragment {
         mSelectStyle = mSelectParms.getmStyleType();
         mIsShowCamra = mSelectParms.isShowCamra();
         mFileType = mSelectParms.getFileType();
+
         if (mIsSingle) {
             mMaxCount = 1;
         }
@@ -104,8 +107,8 @@ public class SelectedImageFragment extends Fragment {
             @Override
             public void loadData(SelectFileEntity entity) {
                 mListData.add(entity);
-                if (mImageAdapter != null) {
-                    mImageAdapter.notifyDataSetChanged();
+                if (mVideoAdapter != null) {
+                    mVideoAdapter.notifyDataSetChanged();
                 }
 
             }
@@ -114,24 +117,24 @@ public class SelectedImageFragment extends Fragment {
 
     private void initAdapter() {
 
-        mImageAdapter = new SelectImageAdapter(getActivity(), mListData, mMaxCount, mSelectStyle);
+        mVideoAdapter = new SelectVideoAdapter(getActivity(), mListData, mMaxCount, mSelectStyle);
         mRlv.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-        mRlv.setAdapter(mImageAdapter);
-        mImageAdapter.setOnSelectedFileCallback(new OnSelectedFileResultCallback() {
+        mRlv.setAdapter(mVideoAdapter);
+        mVideoAdapter.setOnSelectedFileCallback(new OnSelectedFileResultCallback() {
             @Override
             public void selected(List<SelectFileEntity> list, int count) {
                 upDataCbv(list, count);
             }
         });
 
-        mImageAdapter.setOnCamreCallback(new OnCameraCallback() {
+        mVideoAdapter.setOnCamreCallback(new OnCameraCallback() {
             @Override
             public void openCamera() {
                 openCapture();
             }
         });
 
-        mImageAdapter.setOnPreViewCallback(new OnPreViewCallback() {
+        mVideoAdapter.setOnPreViewCallback(new OnPreViewCallback() {
             @Override
             public void openPreView(int postion) {
 
@@ -139,7 +142,7 @@ public class SelectedImageFragment extends Fragment {
                 goIntent(postion);
             }
         });
-        mImageAdapter.setOnNotSelectCallback(new OnNotSelectCallback() {
+        mVideoAdapter.setOnNotSelectCallback(new OnNotSelectCallback() {
             @Override
             public void notSelect() {
                 Toast.makeText(getActivity(), "最多选" + mMaxCount + "张", Toast.LENGTH_SHORT).show();
@@ -157,7 +160,7 @@ public class SelectedImageFragment extends Fragment {
 
     private void openCapture() {
         if (mMediaStoreCompat != null) {
-            mMediaStoreCompat.dispatchImageIntent(getActivity(), REQUEST_CODE_CAPTURE);
+            mMediaStoreCompat.dispatchVideoIntent(getContext(), REQUEST_CODE_CAPTURE);
         }
     }
 
@@ -184,10 +187,7 @@ public class SelectedImageFragment extends Fragment {
     public void onSelectedFileEvent(SelectDataEvent event) {
 
         mListData = event.getList();
-
-        Log.i("AA", "进来了2=" + mListData.toString());
-
-        mImageAdapter.notifyDataSetChanged();
+        mVideoAdapter.notifyDataSetChanged();
 
         if (null != mUiCallback) {
             mSeleetedData = event.getmSelectedList();
@@ -208,7 +208,7 @@ public class SelectedImageFragment extends Fragment {
 
 
         mListData = event.getList();
-        mImageAdapter.notifyDataSetChanged();
+        mVideoAdapter.notifyDataSetChanged();
 
         if (null != mUiCallback) {
 
@@ -267,6 +267,7 @@ public class SelectedImageFragment extends Fragment {
         return false;
     }
 
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
@@ -288,9 +289,7 @@ public class SelectedImageFragment extends Fragment {
 
                 }
             });
-
             getActivity().finish();
         }
     }
-
 }

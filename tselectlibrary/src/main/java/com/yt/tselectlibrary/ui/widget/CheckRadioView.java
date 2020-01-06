@@ -1,4 +1,4 @@
-package com.yt.tselectlibrary.ui;
+package com.yt.tselectlibrary.ui.widget;
 
 import android.content.Context;
 import android.graphics.PorterDuff;

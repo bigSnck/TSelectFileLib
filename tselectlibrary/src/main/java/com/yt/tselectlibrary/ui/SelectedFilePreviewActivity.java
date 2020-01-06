@@ -4,6 +4,7 @@ package com.yt.tselectlibrary.ui;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -17,6 +18,9 @@ import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.PreviewPagerAdapter;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
+import com.yt.tselectlibrary.ui.contast.FileType;
+import com.yt.tselectlibrary.ui.contast.SelectParms;
+import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 import com.yt.tselectlibrary.ui.event.ClickPreviewImageEvent;
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
@@ -53,10 +57,15 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
     private List<SelectFileEntity> mAllList;
 
 
+    private SelectedStyleType mSelectStyle;//表示有右上角的数字
+    private SelectParms mSelectParms;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview_file_layout);
+        mSelectParms = getIntent().getParcelableExtra("data");
+        mSelectStyle = mSelectParms.getmStyleType();
         mList = new ArrayList<>();
         initView();
 
@@ -129,6 +138,12 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
                 }
             }
         });
+
+        if (mSelectParms.getFileType() == FileType.IMAGE) {
+            mSelectBottomView.setLLOraiginalView(View.VISIBLE);
+        } else {
+            mSelectBottomView.setLLOraiginalView(View.INVISIBLE);
+        }
     }
 
     private void setTopView() {
@@ -138,8 +153,13 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
         if (entity.isSelected()) {
 
-            mCheckView.setCountable(true);
-            mCheckView.setCheckedNum(entity.getSelectIndex());
+
+            if (mSelectStyle == SelectedStyleType.NUMBER) {
+                mCheckView.setCountable(true);
+                mCheckView.setCheckedNum(entity.getSelectIndex());
+            } else {
+                mCheckView.setChecked(true);
+            }
         }
 
         mCheckView.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +196,6 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
         updataTopShow(entity);
 
-        Log.i("AA", "list==" + mList.size());
 
         if (mAdpter != null) {
             mAdpter.notifyDataSetChanged();
@@ -186,9 +205,13 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
     private void updataTopShow(SelectFileEntity entity) {
         if (entity.isSelected()) {
+            if (mSelectStyle == SelectedStyleType.NUMBER) {
+                mCheckView.setCountable(true);
+                mCheckView.setCheckedNum(entity.getSelectIndex());
+            } else {
+                mCheckView.setChecked(true);
+            }
 
-            mCheckView.setCountable(true);
-            mCheckView.setCheckedNum(entity.getSelectIndex());
         } else {
             mCheckView.setCountable(false);
             mCheckView.setChecked(false);
@@ -261,5 +284,19 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
         if (EventBus.getDefault().isRegistered(this))//加上判断
             EventBus.getDefault().unregister(this);
         super.onDestroy();
+    }
+
+    /**
+     * 屏蔽实体返回键
+     * @param event
+     * @return
+     */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK ) {
+            return true;
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 }

@@ -1,8 +1,6 @@
 package com.yt.tselectlibrary.ui.adapter;
 
 import android.content.Context;
-
-
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,19 +10,18 @@ import com.yt.baseadapterlibrary.TBaseAdapter;
 import com.yt.baseadapterlibrary.view.MultiTypeSupport;
 import com.yt.baseadapterlibrary.view.ViewHolder;
 import com.yt.tselectlibrary.R;
-import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
+import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.callback.OnNotSelectCallback;
 import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.widget.CheckView;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
+public class SelectVideoAdapter extends TBaseAdapter<SelectFileEntity> {
     private List<SelectFileEntity> mSelectedArray;
     private SelectedStyleType mSelectStyle ;//表示有右上角的数字
     private OnSelectedFileResultCallback mOnSelectedFileResultCallback;
@@ -34,14 +31,14 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
 
     private int mMaxCount = -1;
 
-    public SelectImageAdapter(Context context, List<SelectFileEntity> data, int maxCount,SelectedStyleType selectStyle) {
+    public SelectVideoAdapter(Context context, List<SelectFileEntity> data, int maxCount, SelectedStyleType selectStyle) {
         super(context, data, new MultiTypeSupport<SelectFileEntity>() {
             @Override
             public int getLayout(SelectFileEntity item, int postion) {
                 if (item.getIdInt() == -1) {
                     return R.layout.adapter_photo_capture_item;
                 } else {
-                    return R.layout.adapter_selected_image_layout;
+                    return R.layout.adapter_selected_video_layout;
                 }
 
             }
@@ -59,6 +56,7 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
 
         if (selectFileEntity.getIdInt() == -1) {//触发拍照按钮
             TextView itemTvHint = (TextView) holder.getView(R.id.item_tv_hint);
+            itemTvHint.setText("录视频");
             itemTvHint.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -70,6 +68,8 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
         } else {
 
             ImageView imageView = (ImageView) holder.getView(R.id.item_siv_image);
+
+            holder.setText(R.id.item_tv_videoTime,selectFileEntity.getDurationTime());
             final CheckView checkView = (CheckView) holder.getView(R.id.item_check_view);
             Glide.with(mContext)
                     .load(selectFileEntity.getOriginalPath())

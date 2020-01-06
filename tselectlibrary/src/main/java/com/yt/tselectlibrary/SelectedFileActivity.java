@@ -4,12 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 
-import android.os.Parcelable;
-import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -25,6 +25,7 @@ import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.ResultEvent;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
+import com.yt.tselectlibrary.ui.SelectedVideoFragment;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -34,20 +35,22 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class SelectedImageActivity extends FragmentActivity implements EasyPermissions.PermissionCallbacks {
+public class SelectedFileActivity extends FragmentActivity implements EasyPermissions.PermissionCallbacks {
 
     private SelectBottomView mBottomView;
 
-    private SelectedImageFragment mImagefragment;
+    private Fragment mFileFragment;
+
     private List<SelectFileEntity> mSelectFileList;
     private List<SelectFileEntity> mAllList;
     private SelectParms mSelectParms;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_selected_image_layout);
+        setContentView(R.layout.activity_selected_file_layout);
 
 
         getDataIntent();
@@ -61,7 +64,6 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
                     if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
                         goIntent();
                     }
-
                     if (selectedViewType == SelectedViewType.SELECTED_VIEW) {
                         //确定选中的图片
                         setSelectedResult();
@@ -69,27 +71,63 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
                 }
             }
         });
+        if (mSelectParms.getFileType() == FileType.IMAGE) {
+            mBottomView.setLLOraiginalView(View.VISIBLE);
+        } else {
+            mBottomView.setLLOraiginalView(View.INVISIBLE);
 
-        mImagefragment = new SelectedImageFragment();
-        mImagefragment.setOnUiSelectResultCallback(new OnUiSelectResultCallback() {
-            @Override
-            public void selected(List<SelectFileEntity> allList, List<SelectFileEntity> selectedFileList, int count, FileType fileType) {
-                mSelectFileList = selectedFileList;
-                mAllList = allList;
-                mBottomView.upDataSelectedFileCount(count);
+        }
+
+        if (mSelectParms.getFileType() == FileType.IMAGE) {
+            mFileFragment = new SelectedImageFragment();
+        }
+        if (mSelectParms.getFileType() == FileType.VIDEO) {
+            mFileFragment = new SelectedVideoFragment();
+        }
 
 
-            }
-        });
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("data", mSelectParms);
+        mFileFragment.setArguments(bundle);
+
+        if (mFileFragment instanceof SelectedImageFragment) {
+            SelectedImageFragment mImageFragment = (SelectedImageFragment) mFileFragment;
+            mImageFragment.setOnUiSelectResultCallback(new OnUiSelectResultCallback() {
+                @Override
+                public void selected(List<SelectFileEntity> allList, List<SelectFileEntity> selectedFileList, int count, FileType fileType) {
+                    mSelectFileList = selectedFileList;
+                    mAllList = allList;
+                    mBottomView.upDataSelectedFileCount(count);
+
+
+                }
+            });
+        }
+
+        if (mFileFragment instanceof SelectedVideoFragment) {
+            SelectedVideoFragment mVideoFragment = (SelectedVideoFragment) mFileFragment;
+            mVideoFragment.setOnUiSelectResultCallback(new OnUiSelectResultCallback() {
+                @Override
+                public void selected(List<SelectFileEntity> allList, List<SelectFileEntity> selectedFileList, int count, FileType fileType) {
+                    mSelectFileList = selectedFileList;
+                    mAllList = allList;
+                    mBottomView.upDataSelectedFileCount(count);
+
+
+                }
+            });
+        }
+
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.s_contanier, mImagefragment);
+        transaction.add(R.id.s_contanier, mFileFragment);
 
 
         String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(SelectedImageActivity.this, perms)) {
+        if (EasyPermissions.hasPermissions(SelectedFileActivity.this, perms)) {
             transaction.commit();
         } else {
-            EasyPermissions.requestPermissions(SelectedImageActivity.this, "需要内存权限", 1001, perms);
+
+            EasyPermissions.requestPermissions(SelectedFileActivity.this, "需要内存权限", 1001, perms);
         }
 
 
@@ -142,7 +180,6 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
             // 当用户从应用设置界面返回的时候，可以做一些事情，比如弹出一个土司。
             Toast.makeText(this, "权限设置界面返回", Toast.LENGTH_SHORT).show();
         }
-
     }
 
 
@@ -150,6 +187,7 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
 
         EventBus.getDefault().postSticky(new FilePreviewDataEvent(mAllList, mSelectFileList));
         Intent intent = new Intent(this, SelectedFilePreviewActivity.class);
+        intent.putExtra("data", mSelectParms);
         startActivity(intent);
     }
 
