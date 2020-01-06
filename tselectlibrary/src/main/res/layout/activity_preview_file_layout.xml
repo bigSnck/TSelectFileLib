@@ -5,10 +5,14 @@
 
     android:layout_height="match_parent">
 
+
+
     <com.yt.tselectlibrary.ui.widget.PreviewViewPager
         android:id="@+id/preview_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
 
     <com.yt.tselectlibrary.ui.widget.SelectBottomView
         android:id="@+id/preview_file_sbv"
@@ -18,7 +22,6 @@
         android:layout_alignParentBottom="true"
         android:background="@color/preview_bottom_toolbar_bg"
         android:gravity="bottom"></com.yt.tselectlibrary.ui.widget.SelectBottomView>
-
     <FrameLayout
         android:id="@+id/preview_top_toolbar"
         android:layout_width="wrap_content"

@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.os.Parcelable;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -11,17 +13,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.yt.tselectlibrary.ui.FilePreviewActivity;
 import com.yt.tselectlibrary.ui.SelectedFilePreviewActivity;
 import com.yt.tselectlibrary.ui.SelectedImageFragment;
-import com.yt.tselectlibrary.ui.bean.FileType;
+import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
+import com.yt.tselectlibrary.ui.contast.SelectParms;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
-import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
+import com.yt.tselectlibrary.ui.event.ResultEvent;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,6 +41,7 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
     private SelectedImageFragment mImagefragment;
     private List<SelectFileEntity> mSelectFileList;
     private List<SelectFileEntity> mAllList;
+    private SelectParms mSelectParms;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,16 +49,22 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
 
         setContentView(R.layout.activity_selected_image_layout);
 
-        mBottomView = findViewById(R.id.s_file_sbv);
 
+        getDataIntent();
+        mBottomView = findViewById(R.id.s_file_sbv);
 
         mBottomView.setOnViewClickCallback(new OnViewClickCallback() {
             @Override
             public void selected(SelectedViewType selectedViewType) {
 
-                if(null!=mSelectFileList){
-                    if(selectedViewType==SelectedViewType.PREVIEW_VIEW){
+                if (null != mSelectFileList) {
+                    if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
                         goIntent();
+                    }
+
+                    if (selectedViewType == SelectedViewType.SELECTED_VIEW) {
+                        //确定选中的图片
+                        setSelectedResult();
                     }
                 }
             }
@@ -65,9 +74,11 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
         mImagefragment.setOnUiSelectResultCallback(new OnUiSelectResultCallback() {
             @Override
             public void selected(List<SelectFileEntity> allList, List<SelectFileEntity> selectedFileList, int count, FileType fileType) {
-                mSelectFileList=selectedFileList;
-                mAllList=allList;
+                mSelectFileList = selectedFileList;
+                mAllList = allList;
                 mBottomView.upDataSelectedFileCount(count);
+
+
             }
         });
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -78,11 +89,15 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
         if (EasyPermissions.hasPermissions(SelectedImageActivity.this, perms)) {
             transaction.commit();
         } else {
-            // Do not have permissions, request them now
             EasyPermissions.requestPermissions(SelectedImageActivity.this, "需要内存权限", 1001, perms);
         }
 
 
+    }
+
+    private void getDataIntent() {
+        Intent intent = getIntent();
+        mSelectParms = intent.getParcelableExtra("data");
     }
 
 
@@ -136,6 +151,12 @@ public class SelectedImageActivity extends FragmentActivity implements EasyPermi
         EventBus.getDefault().postSticky(new FilePreviewDataEvent(mAllList, mSelectFileList));
         Intent intent = new Intent(this, SelectedFilePreviewActivity.class);
         startActivity(intent);
+    }
+
+    private void setSelectedResult() {
+
+        EventBus.getDefault().postSticky(new ResultEvent(mSelectFileList));
+        finish();
     }
 
 }

@@ -51,6 +51,8 @@ public class FilePreviewActivity extends AppCompatActivity {
 
     private boolean mIsChecked;//是否选中状态
 
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,7 +89,7 @@ public class FilePreviewActivity extends AppCompatActivity {
 
         setBottomView();
         setTopView();
-        Log.i("AA", "数据=" + mPostion);
+
     }
 
     private void initView() {
@@ -118,9 +120,9 @@ public class FilePreviewActivity extends AppCompatActivity {
             public void selected(SelectedViewType selectedViewType) {
                 if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
 
-                    Log.i("AA","选中的1="+mList.size()+"::"+mSelecedData.size());
+                    Log.i("AA", "选中的1=" + mList.size() + "::" + mSelecedData.size());
 
-                    EventBus.getDefault().postSticky(new SelectDataEvent(mList,mSelecedData,mPostion));
+                    EventBus.getDefault().postSticky(new SelectDataEvent(mList, mSelecedData, mPostion));
                     finish();
                 }
             }
@@ -202,10 +204,19 @@ public class FilePreviewActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void getFileDataEvent(PreviewDataEvent event) {
+        Log.i("AA","--------------->>进来了");
         mList = event.getList();
         mPostion = event.getPosition();
+        Log.i("AA", "1数据=" + mPostion+"::mList="+mList.size());
         mSelecedData = event.getmSelectedList();
+        if (!mList.isEmpty()) {
+            if (mList.get(0).getIdInt() == -1) {
+                mList.remove(0);
 
+            }
+        }
+
+        Log.i("AA", "2数据=" + mPostion+"::mList="+mList.size());
         initAdapter();
     }
 

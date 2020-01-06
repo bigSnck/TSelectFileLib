@@ -98,12 +98,12 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
                 public void onClick(View v) {
 
                     if (mOnPreViewCallback != null) {
-                        Log.i("AA","数据=adapter"+holder.getAdapterPosition());
-
                         mOnPreViewCallback.openPreView(holder.getAdapterPosition());
                     }
                 }
             });
+
+
 
         }
 

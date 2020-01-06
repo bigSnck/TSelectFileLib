@@ -2,6 +2,7 @@ package com.yt.tselectlibrary.ui;
 
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -19,6 +20,7 @@ import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 import com.yt.tselectlibrary.ui.event.ClickPreviewImageEvent;
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
+import com.yt.tselectlibrary.ui.event.Preview2SelecedDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.widget.CheckView;
@@ -29,6 +31,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectedFilePreviewActivity extends AppCompatActivity {
@@ -38,7 +41,7 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
     private FrameLayout mTopFrameLayout;
     private CheckView mCheckView;
 
-    private List<SelectFileEntity> mList;
+
     private PreviewPagerAdapter mAdpter;
     private int mPostion;
 
@@ -46,15 +49,15 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
     private int mBottomHeight;
     private boolean mIsShow = true;//是否显示操作按钮
     private List<SelectFileEntity> mSelecedData;
-
+    private List<SelectFileEntity> mList;
     private List<SelectFileEntity> mAllList;
-
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview_file_layout);
+        mList = new ArrayList<>();
         initView();
 
     }
@@ -62,10 +65,7 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
     private void initAdapter() {
         mAdpter = new PreviewPagerAdapter(getSupportFragmentManager(), mList);
-        mPreviewViewPager.setAdapter(mAdpter);
 
-
-        mPreviewViewPager.setCurrentItem(mPostion, false);
 
         mPreviewViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -84,6 +84,13 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
             }
         });
+        mPreviewViewPager.setCurrentItem(mPostion, false);
+
+        mPreviewViewPager.setAdapter(mAdpter);
+
+
+        mPreviewViewPager.setOffscreenPageLimit(3);
+
 
         setBottomView();
         setTopView();
@@ -116,7 +123,8 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
             @Override
             public void selected(SelectedViewType selectedViewType) {
                 if (selectedViewType == SelectedViewType.PREVIEW_VIEW) {
-                    EventBus.getDefault().postSticky(new FilePreviewDataEvent(mSelecedData));
+
+                    EventBus.getDefault().postSticky(new Preview2SelecedDataEvent(mAllList, mSelecedData));
                     finish();
                 }
             }
@@ -150,29 +158,30 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
     private void upDataTopView(SelectFileEntity entity) {
 
         if (!mSelecedData.isEmpty()) {
-
             if (mSelecedData.contains(entity)) {
-                if(mAllList.contains(entity)){
-
-                }
                 mSelecedData.remove(entity);
             } else {
                 mSelecedData.add(entity);
             }
         } else {
             mSelecedData.add(entity);
-
         }
-        entity.setSelected(!entity.isSelected());
 
+        entity.setSelected(!entity.isSelected());
 
         for (int i = 0; i < mSelecedData.size(); i++) {
             mSelecedData.get(i).setSelectIndex(i + 1);
         }
 
 
-
         updataTopShow(entity);
+
+        Log.i("AA", "list==" + mList.size());
+
+        if (mAdpter != null) {
+            mAdpter.notifyDataSetChanged();
+        }
+
     }
 
     private void updataTopShow(SelectFileEntity entity) {
@@ -201,10 +210,11 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void getFilePreviewDataEvent(FilePreviewDataEvent event) {
-        mList = event.getSelectedList();
+
+        mList.addAll(event.getSelectedList());
         mPostion = 0;//默认第一张
         mSelecedData = event.getSelectedList();
-        mAllList=event.getList();
+        mAllList = event.getList();
 
         initAdapter();
     }

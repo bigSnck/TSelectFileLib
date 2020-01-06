@@ -36,4 +36,6 @@ public class PreviewViewPager extends ViewPager {
         }
         return super.canScroll(v, checkV, dx, x, y);
     }
+
+
 }

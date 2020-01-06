@@ -4,13 +4,13 @@ import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 
 import java.util.List;
 
-public class FilePreviewDataEvent {
+public class Preview2SelecedDataEvent {
 
     private List<SelectFileEntity> list;//全部的
 
     private List<SelectFileEntity> selectedList;//被选中的
 
-    public FilePreviewDataEvent(List<SelectFileEntity> selectedList) {
+    public Preview2SelecedDataEvent(List<SelectFileEntity> selectedList) {
         this.selectedList = selectedList;
     }
 
@@ -23,7 +23,7 @@ public class FilePreviewDataEvent {
         return list;
     }
 
-    public FilePreviewDataEvent(List<SelectFileEntity> list, List<SelectFileEntity> selectedList) {
+    public Preview2SelecedDataEvent(List<SelectFileEntity> list, List<SelectFileEntity> selectedList) {
         this.list = list;
         this.selectedList = selectedList;
     }

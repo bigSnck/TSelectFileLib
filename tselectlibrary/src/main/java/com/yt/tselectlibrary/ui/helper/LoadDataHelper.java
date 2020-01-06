@@ -8,9 +8,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.yt.tselectlibrary.ui.bean.FileType;
+import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
 

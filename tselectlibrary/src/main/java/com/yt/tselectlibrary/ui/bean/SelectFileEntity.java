@@ -3,6 +3,8 @@ package com.yt.tselectlibrary.ui.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.yt.tselectlibrary.ui.contast.FileType;
+
 public class SelectFileEntity implements Parcelable {
     private boolean isSelected;//是否选中状态 false:未选中 true:选中状态
     private String originalPath;//源文件路径

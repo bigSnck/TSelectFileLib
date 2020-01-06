@@ -27,4 +27,7 @@ public class PreviewPagerAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return mListData.size();
     }
+
+
+
 }

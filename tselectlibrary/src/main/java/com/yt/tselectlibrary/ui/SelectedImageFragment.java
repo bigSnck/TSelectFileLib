@@ -16,14 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.SelectImageAdapter;
 import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
-import com.yt.tselectlibrary.ui.bean.FileType;
+import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
 import com.yt.tselectlibrary.ui.callback.OnPreViewCallback;
 import com.yt.tselectlibrary.ui.callback.OnSelectedFileResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
-import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
+import com.yt.tselectlibrary.ui.event.Preview2SelecedDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
@@ -51,6 +51,7 @@ public class SelectedImageFragment extends Fragment {
     private MediaStoreCompat mMediaStoreCompat;
     public final int REQUEST_CODE_CAPTURE = 24;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,21 +67,19 @@ public class SelectedImageFragment extends Fragment {
         initAdapter();
 
 
-
         return mView;
     }
 
     private void initData() {
         mListData = new ArrayList<>();
 
-        if (mIsShowCamra) {
-            mListData.add(new SelectFileEntity(-1));
-        }
+        updataIsShowCamra();
         LoadDataHelper helper = LoadDataHelper.getInstance();
         helper.getLoadData(getActivity());
         helper.setOnLoadDataCallback(new OnLoadDataCallback() {
             @Override
             public void loadData(SelectFileEntity entity) {
+                Log.i("AAA", "选择图片3=" + mListData.size());
 
                 mListData.add(entity);
                 if (mImageAdapter != null) {
@@ -114,6 +113,9 @@ public class SelectedImageFragment extends Fragment {
             @Override
             public void openPreView(int postion) {
 
+                if (mIsShowCamra) {
+                    postion = postion - 1;
+                }
                 goIntent(postion);
             }
         });
@@ -121,10 +123,6 @@ public class SelectedImageFragment extends Fragment {
 
     private void goIntent(int postion) {
 
-        if (mIsShowCamra) {
-            mListData.remove(0);
-            postion = postion - 1;
-        }
         EventBus.getDefault().postSticky(new PreviewDataEvent(mListData, mSeleetedData, postion));
         Intent intent = new Intent(getActivity(), FilePreviewActivity.class);
         startActivity(intent);
@@ -141,37 +139,64 @@ public class SelectedImageFragment extends Fragment {
 
         if (null != mUiCallback) {
             mSeleetedData = list;
-            mUiCallback.selected(list, count, FileType.IMAGE);
+            mUiCallback.selected(mListData, list, count, FileType.IMAGE);
         }
     }
+
 
     public void setOnUiSelectResultCallback(OnUiSelectResultCallback callback) {
         mUiCallback = callback;
     }
 
-
     /**
-     * 来自预览选泽的图片
+     * 来自预览所有所选泽的图片（来自这个类FilePreviewActivity--》initView（））
      *
      * @param event
      */
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onSelectedFileEvent(SelectDataEvent event) {
 
-
         mListData = event.getList();
-        if (mIsShowCamra) {
-            mListData.add(0, new SelectFileEntity(-1));
-        }
+        updataIsShowCamra();
         mImageAdapter.notifyDataSetChanged();
+        Log.i("AAA", "选择图片2=" + mListData.size());
 
         if (null != mUiCallback) {
 
             mSeleetedData = event.getmSelectedList();
-            mUiCallback.selected(mSeleetedData, mSeleetedData.size(), FileType.IMAGE);
+            mUiCallback.selected(mListData, mSeleetedData, mSeleetedData.size(), FileType.IMAGE);
         }
+        EventBus.getDefault().cancelEventDelivery(event);
+
     }
 
+
+    /**
+     * 数据来自预览所选泽的图片（来自这个类SelectedFilePreviewActivity--》initView（））
+     *
+     * @param event
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onFilePreviewSlectedEvent(Preview2SelecedDataEvent event) {
+
+
+        mListData = event.getList();
+        mImageAdapter.notifyDataSetChanged();
+        Log.i("AAA", "选择图片1=" + mListData.size());
+
+        if (null != mUiCallback) {
+
+            mSeleetedData = event.getSelectedList();
+            mUiCallback.selected(mListData, mSeleetedData, mSeleetedData.size(), FileType.IMAGE);
+        }
+
+        EventBus.getDefault().cancelEventDelivery(event);
+    }
+
+
+    /**
+     * 注册EventBus
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -181,11 +206,40 @@ public class SelectedImageFragment extends Fragment {
 
     }
 
+    /**
+     * 销毁EventBus
+     */
     @Override
     public void onDestroy() {
 
-        if (EventBus.getDefault().isRegistered(this))//加上判断
-            EventBus.getDefault().unregister(this);
+
         super.onDestroy();
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }//加上判断
+
+        //离开这个页面的时候删除调所有的Event
+        EventBus.getDefault().removeAllStickyEvents();
+
     }
+
+    private void updataIsShowCamra() {
+        if (mIsShowCamra) {
+            if (!isContainer(mListData)) {
+                mListData.add(0, new SelectFileEntity(-1));
+            }
+        }
+    }
+
+    private boolean isContainer(List<SelectFileEntity> list) {
+
+        if (!list.isEmpty()) {
+            if (list.get(0).getIdInt() == -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

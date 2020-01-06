@@ -19,7 +19,7 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
     private Context mContext;
     private View mView;
 
-    private int mCount=1;//选中图片的数目
+    private int mCount = 1;//选中图片的数目
 
     private TextView mTvPreview;
     private TextView mTvSelect;
@@ -84,8 +84,9 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
      */
     private void onPreviewClick() {
         if (null != mClickCallback) {
-            mClickCallback.selected(SelectedViewType.PREVIEW_VIEW);
-
+            if (mCount > 0) {
+                mClickCallback.selected(SelectedViewType.PREVIEW_VIEW);
+            }
         }
     }
 
@@ -116,14 +117,13 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
      * 更新ViewState
      */
     private void updataOraiginal() {
-        if(mCrOriginal.getIsSeleced()){
+        if (mCrOriginal.getIsSeleced()) {
             mCrOriginal.setIsSeleced(!mCrOriginal.getIsSeleced());
-        }else {
+        } else {
             mCrOriginal.setIsSeleced(!mCrOriginal.getIsSeleced());
 
         }
     }
-
 
 
     /**
@@ -139,11 +139,11 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
     public void upDataSelectedFileCount(int count) {
         mCount = count;
 
-        setAlpha(mTvPreview,0.5f,1f);
-        setAlpha(mTvSelect,0.5f,1f);
+        setAlpha(mTvPreview, 0.5f, 1f);
+        setAlpha(mTvSelect, 0.5f, 1f);
 
-        if(mCount>0){
-            mTvSelect.setText("使用("+mCount+")");
+        if (mCount > 0) {
+            mTvSelect.setText("使用(" + mCount + ")");
         }
     }
 
@@ -179,10 +179,10 @@ public class SelectBottomView extends LinearLayout implements View.OnClickListen
     }
 
 
-    private void setAlpha(View view,float minValue,float maxValue){
-        if(mCount>0){
+    private void setAlpha(View view, float minValue, float maxValue) {
+        if (mCount > 0) {
             view.setAlpha(maxValue);
-        }else {
+        } else {
             view.setAlpha(minValue);
 
         }
