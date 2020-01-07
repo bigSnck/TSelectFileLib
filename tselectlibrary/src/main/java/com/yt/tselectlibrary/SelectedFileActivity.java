@@ -2,8 +2,13 @@ package com.yt.tselectlibrary;
 
 import android.Manifest;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -24,6 +29,7 @@ import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.ResultEvent;
+import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
 import com.yt.tselectlibrary.ui.SelectedVideoFragment;
 
@@ -122,7 +128,7 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
         transaction.add(R.id.s_contanier, mFileFragment);
 
 
-        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO};
         if (EasyPermissions.hasPermissions(SelectedFileActivity.this, perms)) {
             transaction.commit();
         } else {
@@ -180,6 +186,7 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
             // 当用户从应用设置界面返回的时候，可以做一些事情，比如弹出一个土司。
             Toast.makeText(this, "权限设置界面返回", Toast.LENGTH_SHORT).show();
         }
+
     }
 
 

@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void onSelectClick(View view) {
 
-
         new TSelectFile()
                 .from(this)
                 .setSelectMax(5)

@@ -58,8 +58,6 @@ public class PreviewItemFragment extends Fragment {
         mImageViewTouch.setSingleTapListener(new ImageViewTouch.OnImageViewTouchSingleTapListener() {
             @Override
             public void onSingleTapConfirmed() {
-                Toast.makeText(getActivity(),"过来了1",Toast.LENGTH_SHORT).show();
-
                 EventBus.getDefault().post(new ClickPreviewImageEvent());
             }
         });

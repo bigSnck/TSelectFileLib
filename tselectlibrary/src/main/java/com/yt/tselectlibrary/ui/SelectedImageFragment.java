@@ -1,6 +1,10 @@
 package com.yt.tselectlibrary.ui;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,14 +36,16 @@ import com.yt.tselectlibrary.ui.event.Preview2SelecedDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
+import com.yt.tselectlibrary.ui.helper.CameraHelper;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
-import com.yt.tselectlibrary.ui.util.MediaStoreCompat;
+import com.yt.tselectlibrary.ui.util.RotateBitmapUtils;
 import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +60,7 @@ public class SelectedImageFragment extends Fragment {
 
     private OnUiSelectResultCallback mUiCallback;
 
-    private MediaStoreCompat mMediaStoreCompat;
+
     public final int REQUEST_CODE_CAPTURE = 24;
 
     private int mMaxCount; //最多选择多少张图片
@@ -64,6 +70,7 @@ public class SelectedImageFragment extends Fragment {
     private boolean mIsShowCamra = true;//是否显示拍照
     private FileType mFileType;
     private SelectParms mSelectParms;
+    private CameraHelper mCameraHelper;
 
 
     @Nullable
@@ -84,9 +91,10 @@ public class SelectedImageFragment extends Fragment {
         }
 
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
-        mMediaStoreCompat = new MediaStoreCompat(getActivity(), this);
 
-        mMediaStoreCompat.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
+        mCameraHelper = new CameraHelper(getActivity(), this);
+        mCameraHelper.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
+
 
         initData();
         initAdapter();
@@ -156,8 +164,9 @@ public class SelectedImageFragment extends Fragment {
     }
 
     private void openCapture() {
-        if (mMediaStoreCompat != null) {
-            mMediaStoreCompat.dispatchImageIntent(getActivity(), REQUEST_CODE_CAPTURE);
+
+        if (mCameraHelper != null) {
+            mCameraHelper.openCameraImage(REQUEST_CODE_CAPTURE);
         }
     }
 
@@ -184,8 +193,6 @@ public class SelectedImageFragment extends Fragment {
     public void onSelectedFileEvent(SelectDataEvent event) {
 
         mListData = event.getList();
-
-        Log.i("AA", "进来了2=" + mListData.toString());
 
         mImageAdapter.notifyDataSetChanged();
 
@@ -269,28 +276,29 @@ public class SelectedImageFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_CAPTURE) {
-            Uri contentUri = mMediaStoreCompat.getCurrentPhotoUri();
-            String path = mMediaStoreCompat.getCurrentPhotoPath();
-            ArrayList<Uri> selected = new ArrayList<>();
-            selected.add(contentUri);
-            ArrayList<String> selectedPath = new ArrayList<>();
-            selectedPath.add(path);
+        if (requestCode == REQUEST_CODE_CAPTURE && resultCode == getActivity().RESULT_OK) {
+            Uri contentUri = mCameraHelper.getCurrentPhotoUri();
+            String path = mCameraHelper.getCurrentPhotoPath();
 
-            //不添加这句新拍的照片在相册里里面是找不到的
-            new SingleMediaScanner(getActivity(), path, new SingleMediaScanner.ScanListener() {
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            RotateBitmapUtils rotateBitmapUtils = new RotateBitmapUtils();//解决部分手机图片旋转问题
+            int degree = rotateBitmapUtils.getBitmapDegree(path);
+            if (degree != 0) {
+                bitmap = rotateBitmapUtils.rotateBitmapByDegree(bitmap, degree);
+            }
+            //刷新图片在手机数据库里面的信息，才能在相册里面查找到
+            SingleMediaScanner imageScanner = new SingleMediaScanner(getActivity(), new SingleMediaScanner.ScanListener() {
                 @Override
                 public void onScanFinish() {
-                    Log.i("SingleMediaScanner", "scan finish!");
-
+                    getActivity().finish();
                 }
             });
+            imageScanner.insertIntoImageStore(bitmap);
 
-            getActivity().finish();
         }
     }
+
 
 }

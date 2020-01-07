@@ -1,8 +1,6 @@
 package com.yt.tselectlibrary.ui;
 
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,8 +15,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yt.tselectlibrary.R;
-import com.yt.tselectlibrary.ui.FilePreviewActivity;
-import com.yt.tselectlibrary.ui.adapter.SelectImageAdapter;
 import com.yt.tselectlibrary.ui.adapter.SelectVideoAdapter;
 import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
@@ -34,8 +30,8 @@ import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.event.Preview2SelecedDataEvent;
 import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
+import com.yt.tselectlibrary.ui.helper.CameraHelper;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
-import com.yt.tselectlibrary.ui.util.MediaStoreCompat;
 import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
 
 import org.greenrobot.eventbus.EventBus;
@@ -56,7 +52,7 @@ public class SelectedVideoFragment extends Fragment {
 
     private OnUiSelectResultCallback mUiCallback;
 
-    private MediaStoreCompat mMediaStoreCompat;
+
     public final int REQUEST_CODE_CAPTURE = 24;
 
     private int mMaxCount; //最多选择多少张图片
@@ -66,6 +62,7 @@ public class SelectedVideoFragment extends Fragment {
     private boolean mIsShowCamra = true;//是否显示拍照
     private FileType mFileType;
     private SelectParms mSelectParms;
+    private CameraHelper mCameraHelper;
 
 
     @Nullable
@@ -87,9 +84,8 @@ public class SelectedVideoFragment extends Fragment {
         }
 
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
-        mMediaStoreCompat = new MediaStoreCompat(getActivity(), this);
-
-        mMediaStoreCompat.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
+        mCameraHelper = new CameraHelper(getActivity(), this);
+        mCameraHelper.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
 
         initData();
         initAdapter();
@@ -159,8 +155,9 @@ public class SelectedVideoFragment extends Fragment {
     }
 
     private void openCapture() {
-        if (mMediaStoreCompat != null) {
-            mMediaStoreCompat.dispatchVideoIntent(getContext(), REQUEST_CODE_CAPTURE);
+
+        if (null != mCameraHelper) {
+            mCameraHelper.openCameraVideo(REQUEST_CODE_CAPTURE);
         }
     }
 
@@ -273,23 +270,23 @@ public class SelectedVideoFragment extends Fragment {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_CAPTURE) {
-            Uri contentUri = mMediaStoreCompat.getCurrentPhotoUri();
-            String path = mMediaStoreCompat.getCurrentPhotoPath();
-            ArrayList<Uri> selected = new ArrayList<>();
-            selected.add(contentUri);
-            ArrayList<String> selectedPath = new ArrayList<>();
-            selectedPath.add(path);
+        Log.i("AA", "扫描------------->>1=" + resultCode);
+        if (requestCode == REQUEST_CODE_CAPTURE && resultCode == getActivity().RESULT_OK) {
 
-            //不添加这句新拍的照片在相册里里面是找不到的
-            new SingleMediaScanner(getActivity(), path, new SingleMediaScanner.ScanListener() {
+
+            String path = mCameraHelper.getCurrentPhotoPath();
+
+            //不添加这句新拍的照片在相册里里面是找不到的,相当重要的
+
+            SingleMediaScanner videoScanner = new SingleMediaScanner(getActivity(), new SingleMediaScanner.ScanListener() {
                 @Override
                 public void onScanFinish() {
-                    Log.i("SingleMediaScanner", "scan finish!");
-
+                    getActivity().finish();
                 }
             });
-            getActivity().finish();
+            videoScanner.insertIntoMediaStore(true, path);
         }
     }
+
+
 }
