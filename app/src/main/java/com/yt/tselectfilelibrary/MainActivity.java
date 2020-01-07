@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
 import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.contast.TSelectFile;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
                 .setSelectedStyle(SelectedStyleType.NUMBER)
                 .setSeletctFileType(FileType.IMAGE)
                 .setIsShowCamra(true)
+                .setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"))
                 .creat();
     }
 

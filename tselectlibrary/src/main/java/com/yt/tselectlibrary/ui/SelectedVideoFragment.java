@@ -85,8 +85,7 @@ public class SelectedVideoFragment extends Fragment {
 
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
         mCameraHelper = new CameraHelper(getActivity(), this);
-        mCameraHelper.setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"));
-
+        mCameraHelper.setCaptureStrategy(mSelectParms.getCaptureStrategy());
         initData();
         initAdapter();
 

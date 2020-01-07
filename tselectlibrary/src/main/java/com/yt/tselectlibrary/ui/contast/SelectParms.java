@@ -4,12 +4,15 @@ package com.yt.tselectlibrary.ui.contast;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
+
 public class SelectParms implements Parcelable {
 
     private int maxCount;
     private boolean single;
     private FileType fileType;
-    private SelectedStyleType mStyleType;
+    private SelectedStyleType styleType;
+    private CaptureStrategy captureStrategy;
 
     private boolean isShowCamra;
 
@@ -20,18 +23,27 @@ public class SelectParms implements Parcelable {
         this.fileType = fileType;
     }
 
-    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType mStyleType) {
+    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType styleType) {
         this.maxCount = maxCount;
         this.single = single;
         this.fileType = fileType;
-        this.mStyleType = mStyleType;
+        this.styleType = styleType;
     }
 
     public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType mStyleType, boolean isShowCamra) {
         this.maxCount = maxCount;
         this.single = single;
         this.fileType = fileType;
-        this.mStyleType = mStyleType;
+        this.styleType = mStyleType;
+        this.isShowCamra = isShowCamra;
+    }
+
+    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType styleType, boolean isShowCamra, CaptureStrategy captureStrategy) {
+        this.maxCount = maxCount;
+        this.single = single;
+        this.fileType = fileType;
+        this.styleType = styleType;
+        this.captureStrategy = captureStrategy;
         this.isShowCamra = isShowCamra;
     }
 
@@ -51,16 +63,16 @@ public class SelectParms implements Parcelable {
     }
 
     public SelectedStyleType getmStyleType() {
-        return mStyleType;
+        return styleType;
     }
 
     public boolean isShowCamra() {
         return isShowCamra;
     }
-
-    public void setShowCamra(boolean showCamra) {
-        isShowCamra = showCamra;
+    public CaptureStrategy getCaptureStrategy() {
+        return captureStrategy;
     }
+
 
     @Override
     public int describeContents() {
@@ -72,7 +84,8 @@ public class SelectParms implements Parcelable {
         dest.writeInt(this.maxCount);
         dest.writeByte(this.single ? (byte) 1 : (byte) 0);
         dest.writeInt(this.fileType == null ? -1 : this.fileType.ordinal());
-        dest.writeInt(this.mStyleType == null ? -1 : this.mStyleType.ordinal());
+        dest.writeInt(this.styleType == null ? -1 : this.styleType.ordinal());
+        dest.writeParcelable(this.captureStrategy, flags);
         dest.writeByte(this.isShowCamra ? (byte) 1 : (byte) 0);
     }
 
@@ -81,8 +94,9 @@ public class SelectParms implements Parcelable {
         this.single = in.readByte() != 0;
         int tmpFileType = in.readInt();
         this.fileType = tmpFileType == -1 ? null : FileType.values()[tmpFileType];
-        int tmpMStyleType = in.readInt();
-        this.mStyleType = tmpMStyleType == -1 ? null : SelectedStyleType.values()[tmpMStyleType];
+        int tmpStyleType = in.readInt();
+        this.styleType = tmpStyleType == -1 ? null : SelectedStyleType.values()[tmpStyleType];
+        this.captureStrategy = in.readParcelable(CaptureStrategy.class.getClassLoader());
         this.isShowCamra = in.readByte() != 0;
     }
 

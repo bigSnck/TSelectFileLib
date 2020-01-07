@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.yt.tselectlibrary.SelectedFileActivity;
+import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
+import com.yt.tselectlibrary.ui.callback.OnResultCallback;
 
 /**
  * 对外暴露的接口
@@ -15,8 +17,11 @@ public class TSelectFile {
     private SelectedStyleType mStyleType = SelectedStyleType.COMMON;
     private boolean mIsShowCamra=false;//默认不显示拍照
 
+    private CaptureStrategy mCaptureStrategy;
+
     private Context mContext;
 
+    private OnResultCallback mOnResultCallback;
     /**
      * 最多选择多少张图片
      *
@@ -72,6 +77,16 @@ public class TSelectFile {
     }
 
     /**
+     * 设置文件保存路径
+     * @param captureStrategy
+     * @return
+     */
+    public TSelectFile setCaptureStrategy(CaptureStrategy captureStrategy) {
+        mCaptureStrategy=captureStrategy;
+        return this;
+    }
+
+    /**
      * 设置是否显示相机
      * @param isShowCamra
      * @return
@@ -81,16 +96,30 @@ public class TSelectFile {
         return this;
     }
 
-    public TSelectFile creat() {
+    public TSelectFile creat(OnResultCallback callback) {
 
-        if (null == mContext) {
+        if (null == mContext||null==mCaptureStrategy) {
             throw new NullPointerException();
         }
+        SelectParms selectParms=  new SelectParms(mMaxCount, mIsSingle, mFileType, mStyleType,mIsShowCamra,mCaptureStrategy);
         Intent intent = new Intent(mContext, SelectedFileActivity.class);
-        intent.putExtra("data", new SelectParms(mMaxCount, mIsSingle, mFileType, mStyleType,mIsShowCamra));
+        intent.putExtra("data",selectParms);
         mContext.startActivity(intent);
+       // SelectedFileActivity.selectFile(callback)
         return this;
+    }
 
+
+    public TSelectFile SingleTakePhoto(OnResultCallback callback) {
+        mOnResultCallback=callback;
+
+        return this;
+    }
+
+    public TSelectFile SingleTakeVideo(OnResultCallback callback) {
+        mOnResultCallback=callback;
+
+        return this;
     }
 
 

@@ -15,7 +15,10 @@
  */
 package com.yt.tselectlibrary.ui.bean;
 
-public class CaptureStrategy {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class CaptureStrategy implements Parcelable {
 
     public final boolean isPublic;
     public final String authority;
@@ -30,4 +33,34 @@ public class CaptureStrategy {
         this.authority = authority;
         this.directory = directory;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte(this.isPublic ? (byte) 1 : (byte) 0);
+        dest.writeString(this.authority);
+        dest.writeString(this.directory);
+    }
+
+    protected CaptureStrategy(Parcel in) {
+        this.isPublic = in.readByte() != 0;
+        this.authority = in.readString();
+        this.directory = in.readString();
+    }
+
+    public static final Parcelable.Creator<CaptureStrategy> CREATOR = new Parcelable.Creator<CaptureStrategy>() {
+        @Override
+        public CaptureStrategy createFromParcel(Parcel source) {
+            return new CaptureStrategy(source);
+        }
+
+        @Override
+        public CaptureStrategy[] newArray(int size) {
+            return new CaptureStrategy[size];
+        }
+    };
 }

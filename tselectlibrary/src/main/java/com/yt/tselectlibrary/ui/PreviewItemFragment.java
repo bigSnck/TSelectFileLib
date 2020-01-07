@@ -2,6 +2,8 @@ package com.yt.tselectlibrary.ui;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -52,9 +54,6 @@ public class PreviewItemFragment extends Fragment {
 
         mIvVideoPaly = mView.findViewById(R.id.fragment_iv_video_play);
 
-
-
-
         mImageViewTouch.setSingleTapListener(new ImageViewTouch.OnImageViewTouchSingleTapListener() {
             @Override
             public void onSingleTapConfirmed() {
@@ -83,9 +82,9 @@ public class PreviewItemFragment extends Fragment {
 
         mSelectFileEntity = getArguments().getParcelable(ARGS_ITEM);
         if (mSelectFileEntity != null) {
-            Glide.with(getActivity())
-                    .load(mSelectFileEntity.getOriginalPath())
-                    .into(mImageViewTouch);
+
+            mImageViewTouch.setImageBitmap(BitmapFactory.decodeFile(mSelectFileEntity.getOriginalPath()));
+
         }
 
        if( mSelectFileEntity.getFileType()== FileType.IMAGE){

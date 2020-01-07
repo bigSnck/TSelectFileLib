@@ -29,7 +29,7 @@ import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.ResultEvent;
-import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
+
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
 import com.yt.tselectlibrary.ui.SelectedVideoFragment;
 
