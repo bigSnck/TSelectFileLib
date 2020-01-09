@@ -1,21 +1,23 @@
 package com.yt.tselectfilelibrary;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+
 
 import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
+import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
+import com.yt.tselectlibrary.ui.callback.OnResultCallback;
 import com.yt.tselectlibrary.ui.contast.FileType;
+import com.yt.tselectlibrary.ui.contast.OperationType;
 import com.yt.tselectlibrary.ui.contast.SelectedStyleType;
 import com.yt.tselectlibrary.ui.contast.TSelectFile;
-import com.yt.tselectlibrary.ui.event.ResultEvent;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -26,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
     }
 
     public void onSelectClick(View view) {
@@ -36,35 +36,32 @@ public class MainActivity extends AppCompatActivity {
                 .from(this)
                 .setSelectMax(5)
                 .setSelectedStyle(SelectedStyleType.NUMBER)
-                .setSeletctFileType(FileType.IMAGE)
+                .setSeletctFileType(FileType.VIDEO)
                 .setIsShowCamra(true)
+                .setOperationType(OperationType.TakeSelect)
                 .setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"))
-                .creat();
+                .creat(new OnResultCallback() {
+                    @Override
+                    public void successSingleResult(SelectFileEntity fileEntity) {
+                          Log.i("AA","选中"+fileEntity.toString());
+                    }
+
+                    @Override
+                    public void successResult(List<SelectFileEntity> resultList) {
+
+                    }
+
+                    @Override
+                    public void errorResult(Exception es) {
+
+                    }
+                });
     }
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void onSelectedResultEvent(ResultEvent event) {
-        List list = event.getList();
-        Toast.makeText(this, "选中了" + list.size() + "张图片", Toast.LENGTH_SHORT).show();
-
-    }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        if (!EventBus.getDefault().isRegistered(this)) {//加上判断
-            EventBus.getDefault().register(this);
-        }
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-        EventBus.getDefault().removeAllStickyEvents();
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("AA","进来了吗1"+"--------->");
     }
 }

@@ -65,7 +65,7 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview_file_layout);
         mSelectParms = getIntent().getParcelableExtra("data");
-        mSelectStyle = mSelectParms.getmStyleType();
+        mSelectStyle = mSelectParms.getStyleType();
         mList = new ArrayList<>();
         initView();
 
@@ -73,7 +73,7 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
 
 
     private void initAdapter() {
-        mAdpter = new PreviewPagerAdapter(getSupportFragmentManager(), mList);
+        mAdpter = new PreviewPagerAdapter(getSupportFragmentManager(), mList,mSelectParms);
 
 
         mPreviewViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -286,6 +286,13 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.i("AA","---------------->>"+"返回2");
+
+    }
+
     /**
      * 屏蔽实体返回键
      * @param event
@@ -294,8 +301,12 @@ public class SelectedFilePreviewActivity extends AppCompatActivity {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK ) {
+
+            Log.i("AA","---------------->>"+"返回");
             return true;
         } else {
+            Log.i("AA","---------------->>"+"返回1");
+
             return super.dispatchKeyEvent(event);
         }
     }

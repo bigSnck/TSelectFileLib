@@ -71,7 +71,7 @@ public class FilePreviewActivity extends AppCompatActivity {
         mMaxCount = mSelectParms.getMaxCount();
         //默认是多些
         mIsSingle = mSelectParms.isSingle();
-        mSelectStyle = mSelectParms.getmStyleType();
+        mSelectStyle = mSelectParms.getStyleType();
         mIsShowCamra = mSelectParms.isShowCamra();
         if (mIsSingle) {
             mMaxCount = 1;
@@ -83,7 +83,7 @@ public class FilePreviewActivity extends AppCompatActivity {
 
 
     private void initAdapter() {
-        mAdpter = new PreviewPagerAdapter(getSupportFragmentManager(), mList);
+        mAdpter = new PreviewPagerAdapter(getSupportFragmentManager(), mList,mSelectParms);
         mPreviewViewPager.setAdapter(mAdpter);
 
 
@@ -144,7 +144,7 @@ public class FilePreviewActivity extends AppCompatActivity {
                         mList.add(0,new SelectFileEntity(-1));
                         Log.i("AA","进来了"+mIsShowCamra);
                     }
-                    Log.i("AA","进来了="+mList.size());
+
                     EventBus.getDefault().postSticky(new SelectDataEvent(mList, mSelecedData, mPostion));
                     finish();
                 }
@@ -263,7 +263,7 @@ public class FilePreviewActivity extends AppCompatActivity {
         mPostion = mPostion - 1;
         mSelecedData = event.getmSelectedList();
         if (mIsShowCamra) {
-            if (mList.get(0).getIdInt() == -1) {
+            if (mList.get(0).getIdLong() == -1) {
                 mList.remove(0);
             }
         }

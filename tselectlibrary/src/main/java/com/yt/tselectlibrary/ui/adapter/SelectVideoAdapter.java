@@ -1,11 +1,13 @@
 package com.yt.tselectlibrary.ui.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.Request;
 import com.yt.baseadapterlibrary.TBaseAdapter;
 import com.yt.baseadapterlibrary.view.MultiTypeSupport;
 import com.yt.baseadapterlibrary.view.ViewHolder;
@@ -23,7 +25,7 @@ import java.util.List;
 
 public class SelectVideoAdapter extends TBaseAdapter<SelectFileEntity> {
     private List<SelectFileEntity> mSelectedArray;
-    private SelectedStyleType mSelectStyle ;//表示有右上角的数字
+    private SelectedStyleType mSelectStyle;//表示有右上角的数字
     private OnSelectedFileResultCallback mOnSelectedFileResultCallback;
     private OnCameraCallback mOnCameraCallback;
     private OnPreViewCallback mOnPreViewCallback;
@@ -35,7 +37,7 @@ public class SelectVideoAdapter extends TBaseAdapter<SelectFileEntity> {
         super(context, data, new MultiTypeSupport<SelectFileEntity>() {
             @Override
             public int getLayout(SelectFileEntity item, int postion) {
-                if (item.getIdInt() == -1) {
+                if (item.getIdLong() == -1) {
                     return R.layout.adapter_photo_capture_item;
                 } else {
                     return R.layout.adapter_selected_video_layout;
@@ -46,15 +48,15 @@ public class SelectVideoAdapter extends TBaseAdapter<SelectFileEntity> {
 
         mSelectedArray = new ArrayList<>();
         mMaxCount = maxCount;
-        mSelectStyle=selectStyle;
+        mSelectStyle = selectStyle;
 
     }
 
     @Override
     public void convert(final ViewHolder holder, final SelectFileEntity selectFileEntity) {
+        Log.i("AA", "adapter=" + selectFileEntity.toString());
 
-
-        if (selectFileEntity.getIdInt() == -1) {//触发拍照按钮
+        if (selectFileEntity.getIdLong() == -1) {//触发拍照按钮
             TextView itemTvHint = (TextView) holder.getView(R.id.item_tv_hint);
             itemTvHint.setText("录视频");
             itemTvHint.setOnClickListener(new View.OnClickListener() {
@@ -69,13 +71,20 @@ public class SelectVideoAdapter extends TBaseAdapter<SelectFileEntity> {
 
             ImageView imageView = (ImageView) holder.getView(R.id.item_siv_image);
 
-            holder.setText(R.id.item_tv_videoTime,selectFileEntity.getDurationTime());
+            holder.setText(R.id.item_tv_videoTime, selectFileEntity.getDurationTime());
             final CheckView checkView = (CheckView) holder.getView(R.id.item_check_view);
-            Glide.with(mContext)
-                    .load(selectFileEntity.getOriginalPath())
+            Request request = Glide.with(mContext)
+                    .load(selectFileEntity.getThumbnailPath())
                     .centerCrop()
-                    .into(imageView);
+                    .into(imageView)
+                    .getRequest();
 
+            if (request.isFailed()) {
+                Glide.with(mContext)
+                        .load(selectFileEntity.getOriginalPath())
+                        .centerCrop()
+                        .into(imageView);
+            }
 
             checkView.setChecked(selectFileEntity.isSelected());
 

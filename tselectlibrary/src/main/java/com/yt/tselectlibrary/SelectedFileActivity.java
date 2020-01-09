@@ -1,6 +1,8 @@
 package com.yt.tselectlibrary;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,18 +22,24 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.yt.tselectlibrary.ui.SelectedFilePreviewActivity;
 import com.yt.tselectlibrary.ui.SelectedImageFragment;
+import com.yt.tselectlibrary.ui.SelectedVideoFragment;
+import com.yt.tselectlibrary.ui.callback.OnResultCallback;
 import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnUiSelectResultCallback;
 import com.yt.tselectlibrary.ui.callback.OnViewClickCallback;
+import com.yt.tselectlibrary.ui.contast.OperationType;
 import com.yt.tselectlibrary.ui.contast.SelectParms;
 import com.yt.tselectlibrary.ui.contast.SelectedViewType;
 
 import com.yt.tselectlibrary.ui.event.FilePreviewDataEvent;
-import com.yt.tselectlibrary.ui.event.ResultEvent;
 
+
+import com.yt.tselectlibrary.ui.helper.CameraHelper;
+import com.yt.tselectlibrary.ui.util.RotateBitmapUtils;
+import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
 import com.yt.tselectlibrary.ui.widget.SelectBottomView;
-import com.yt.tselectlibrary.ui.SelectedVideoFragment;
+
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -50,18 +58,65 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
     private List<SelectFileEntity> mSelectFileList;
     private List<SelectFileEntity> mAllList;
     private SelectParms mSelectParms;
+    private static OnResultCallback mOnResultCallback;
+    private static final int REQUEST_CODE_TAKE_PHOTO = 10;//拍照
+    private static final int REQUEST_CODE_TAKE_VIDEO = 11;//拍视频
+    private static CameraHelper mCameraHelper;
+
+
+    private FragmentTransaction transaction;
+
+
+    public static void selectFile(Context context, SelectParms selectParms, OnResultCallback callback) {
+        mOnResultCallback = callback;
+        Intent intent = new Intent(context, SelectedFileActivity.class);
+        intent.putExtra("data", selectParms);
+        context.startActivity(intent);
+    }
+
+    private static CameraHelper getCameraHelper(Context context, SelectParms selectParms) {
+        CameraHelper mCameraHelper = new CameraHelper((Activity) context);
+        mCameraHelper.setCaptureStrategy(selectParms.getCaptureStrategy());
+        return mCameraHelper;
+    }
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getDataIntent();
         setContentView(R.layout.activity_selected_file_layout);
 
+        mCameraHelper = getCameraHelper(this, mSelectParms);
+        if (mSelectParms.getOperationType() == OperationType.TakePhoto) {//拍摄照片
+            setTakePhoto();
+        }
+        if (mSelectParms.getOperationType() == OperationType.TakeVideo) {//拍摄视频
+            setTakeVideo();
+        }
+        if (mSelectParms.getOperationType() == OperationType.TakeSelect) {
+            setSelected();
+        }
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
+        if (EasyPermissions.hasPermissions(SelectedFileActivity.this, perms)) {
+            if (null != transaction) {
 
-        getDataIntent();
+                transaction.commit();
+            }
+        } else {
+
+            EasyPermissions.requestPermissions(SelectedFileActivity.this, "需要内存权限", 1001, perms);
+        }
+
+
+    }
+
+    /**
+     * 设置图片选择
+     */
+    private void setSelected() {
         mBottomView = findViewById(R.id.s_file_sbv);
-
         mBottomView.setOnViewClickCallback(new OnViewClickCallback() {
             @Override
             public void selected(SelectedViewType selectedViewType) {
@@ -85,10 +140,10 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
         }
 
         if (mSelectParms.getFileType() == FileType.IMAGE) {
-            mFileFragment = new SelectedImageFragment();
+            mFileFragment = new SelectedImageFragment(mCameraHelper);
         }
         if (mSelectParms.getFileType() == FileType.VIDEO) {
-            mFileFragment = new SelectedVideoFragment();
+            mFileFragment = new SelectedVideoFragment(mCameraHelper);
         }
 
 
@@ -124,19 +179,25 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
             });
         }
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.s_contanier, mFileFragment);
 
+    }
 
-        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO};
-        if (EasyPermissions.hasPermissions(SelectedFileActivity.this, perms)) {
-            transaction.commit();
-        } else {
+    /**
+     * 设置拍摄视频
+     */
+    private void setTakeVideo() {
 
-            EasyPermissions.requestPermissions(SelectedFileActivity.this, "需要内存权限", 1001, perms);
-        }
+        mCameraHelper.openCameraVideo(REQUEST_CODE_TAKE_VIDEO);
+    }
 
+    /**
+     * 设置拍照
+     */
+    private void setTakePhoto() {
 
+        mCameraHelper.openCameraImage(REQUEST_CODE_TAKE_PHOTO);
     }
 
     private void getDataIntent() {
@@ -162,11 +223,6 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
 
     @Override
     public void onPermissionsDenied(int requestCode, List<String> perms) {
-        // 此处表示权限申请被用户拒绝了，此处可以通过弹框等方式展示申请该权限的原因，以使用户允许使用该权限
-
-        //(可选的)检查用户是否拒绝授权权限，并且点击了“不再询问”（测试如果不点击 不再询问也会调用这个方法，所以只要拒绝就会调用这个方法）
-        //下面的语句，展示一个对话框指导用户在应用设置里授权权限
-
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             new AppSettingsDialog.Builder(this)
                     .setTitle("申请权限")
@@ -182,11 +238,64 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
-            // Do something after user returned from app settings screen, like showing a Toast.
-            // 当用户从应用设置界面返回的时候，可以做一些事情，比如弹出一个土司。
             Toast.makeText(this, "权限设置界面返回", Toast.LENGTH_SHORT).show();
         }
 
+        if (requestCode == REQUEST_CODE_TAKE_PHOTO && resultCode == RESULT_OK) {
+            setImageResult();
+
+        }
+        if (requestCode == REQUEST_CODE_TAKE_VIDEO && resultCode == RESULT_OK) {
+            setImageVideo();
+
+        }
+
+    }
+
+    /**
+     * 处理返回的视频
+     */
+    private void setImageVideo() {
+        String path = mCameraHelper.getCurrentPhotoPath();
+        Uri uri = mCameraHelper.getCurrentPhotoUri();
+        Log.i("AA","视频路径"+uri);
+
+        SelectFileEntity entity = new SelectFileEntity(true, path, path, FileType.VIDEO);
+        mOnResultCallback.successSingleResult(entity);
+        //不添加这句新拍的照片在相册里里面是找不到的,相当重要的
+
+        SingleMediaScanner videoScanner = new SingleMediaScanner(this, new SingleMediaScanner.ScanListener() {
+            @Override
+            public void onScanFinish() {
+                finish();
+            }
+        });
+        videoScanner.insertIntoMediaStore(true, path);
+    }
+
+    /**
+     * 处理返回的图片
+     */
+    private void setImageResult() {
+        String path = mCameraHelper.getCurrentPhotoPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        RotateBitmapUtils rotateBitmapUtils = new RotateBitmapUtils();//解决部分手机图片旋转问题
+        int degree = rotateBitmapUtils.getBitmapDegree(path);
+        if (degree != 0) {
+            bitmap = rotateBitmapUtils.rotateBitmapByDegree(bitmap, degree);
+        }
+
+        SelectFileEntity entity = new SelectFileEntity(true, path, path, FileType.IMAGE);
+        mOnResultCallback.successSingleResult(entity);
+        //刷新图片在手机数据库里面的信息，才能在相册里面查找到
+        SingleMediaScanner imageScanner = new SingleMediaScanner(this, new SingleMediaScanner.ScanListener() {
+            @Override
+            public void onScanFinish() {
+
+                finish();
+            }
+        });
+        imageScanner.insertIntoImageStore(bitmap);
     }
 
 
@@ -199,8 +308,7 @@ public class SelectedFileActivity extends FragmentActivity implements EasyPermis
     }
 
     private void setSelectedResult() {
-
-        EventBus.getDefault().postSticky(new ResultEvent(mSelectFileList));
+        mOnResultCallback.successResult(mSelectFileList);
         finish();
     }
 

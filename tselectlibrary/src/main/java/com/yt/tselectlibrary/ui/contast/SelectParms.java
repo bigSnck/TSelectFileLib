@@ -13,66 +13,68 @@ public class SelectParms implements Parcelable {
     private FileType fileType;
     private SelectedStyleType styleType;
     private CaptureStrategy captureStrategy;
+    private OperationType operationType;
 
     private boolean isShowCamra;
 
-
-    public SelectParms(int maxCount, boolean single, FileType fileType) {
-        this.maxCount = maxCount;
-        this.single = single;
-        this.fileType = fileType;
-    }
-
-    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType styleType) {
-        this.maxCount = maxCount;
-        this.single = single;
-        this.fileType = fileType;
-        this.styleType = styleType;
-    }
-
-    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType mStyleType, boolean isShowCamra) {
-        this.maxCount = maxCount;
-        this.single = single;
-        this.fileType = fileType;
-        this.styleType = mStyleType;
-        this.isShowCamra = isShowCamra;
-    }
-
-    public SelectParms(int maxCount, boolean single, FileType fileType, SelectedStyleType styleType, boolean isShowCamra, CaptureStrategy captureStrategy) {
-        this.maxCount = maxCount;
-        this.single = single;
-        this.fileType = fileType;
-        this.styleType = styleType;
-        this.captureStrategy = captureStrategy;
-        this.isShowCamra = isShowCamra;
+    public SelectParms() {
     }
 
     public int getMaxCount() {
         return maxCount;
     }
 
-
+    public void setMaxCount(int maxCount) {
+        this.maxCount = maxCount;
+    }
 
     public boolean isSingle() {
         return single;
     }
 
+    public void setSingle(boolean single) {
+        this.single = single;
+    }
 
     public FileType getFileType() {
         return fileType;
     }
 
-    public SelectedStyleType getmStyleType() {
+    public void setFileType(FileType fileType) {
+        this.fileType = fileType;
+    }
+
+    public SelectedStyleType getStyleType() {
         return styleType;
+    }
+
+    public void setStyleType(SelectedStyleType styleType) {
+        this.styleType = styleType;
+    }
+
+    public CaptureStrategy getCaptureStrategy() {
+        return captureStrategy;
+    }
+
+    public void setCaptureStrategy(CaptureStrategy captureStrategy) {
+        this.captureStrategy = captureStrategy;
+    }
+
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public boolean isShowCamra() {
         return isShowCamra;
     }
-    public CaptureStrategy getCaptureStrategy() {
-        return captureStrategy;
-    }
 
+    public void setShowCamra(boolean showCamra) {
+        isShowCamra = showCamra;
+    }
 
     @Override
     public int describeContents() {
@@ -86,6 +88,7 @@ public class SelectParms implements Parcelable {
         dest.writeInt(this.fileType == null ? -1 : this.fileType.ordinal());
         dest.writeInt(this.styleType == null ? -1 : this.styleType.ordinal());
         dest.writeParcelable(this.captureStrategy, flags);
+        dest.writeInt(this.operationType == null ? -1 : this.operationType.ordinal());
         dest.writeByte(this.isShowCamra ? (byte) 1 : (byte) 0);
     }
 
@@ -97,6 +100,8 @@ public class SelectParms implements Parcelable {
         int tmpStyleType = in.readInt();
         this.styleType = tmpStyleType == -1 ? null : SelectedStyleType.values()[tmpStyleType];
         this.captureStrategy = in.readParcelable(CaptureStrategy.class.getClassLoader());
+        int tmpOperationType = in.readInt();
+        this.operationType = tmpOperationType == -1 ? null : OperationType.values()[tmpOperationType];
         this.isShowCamra = in.readByte() != 0;
     }
 

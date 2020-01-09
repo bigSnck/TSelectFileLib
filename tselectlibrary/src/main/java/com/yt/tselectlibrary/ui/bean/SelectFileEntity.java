@@ -1,5 +1,6 @@
 package com.yt.tselectlibrary.ui.bean;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,31 +9,42 @@ import com.yt.tselectlibrary.ui.contast.FileType;
 public class SelectFileEntity implements Parcelable {
     private boolean isSelected;//是否选中状态 false:未选中 true:选中状态
     private String originalPath;//源文件路径
+    private String thumbnailPath;//缩略图路径
     private String compressPath;//压缩后的文件路径
     private FileType fileType;//文件类型
-    private int idInt;//唯一的id,如果idInt值等于-1,表示拍一张照片
+    private long idLong;//唯一的id,如果idInt值等于-1,表示拍一张照片
     private int selectIndex;//选中的位置也就是右上角显示的数字
 
     private String durationTime;
 
+
     public SelectFileEntity(int idInt) {
-        this.idInt = idInt;
+        this.idLong = idInt;
     }
 
-    public SelectFileEntity(boolean isSelected, String originalPath, String compressPath, FileType fileType, int idInt) {
+
+
+    public SelectFileEntity(boolean isSelected, String originalPath, String compressPath, FileType fileType) {
         this.isSelected = isSelected;
         this.originalPath = originalPath;
         this.compressPath = compressPath;
         this.fileType = fileType;
-        this.idInt = idInt;
-    }
 
-    public SelectFileEntity(boolean isSelected, String originalPath, String compressPath, FileType fileType, int idInt, String durationTime) {
+    }
+    public SelectFileEntity(boolean isSelected, String originalPath, String compressPath, FileType fileType, long idLong) {
         this.isSelected = isSelected;
         this.originalPath = originalPath;
         this.compressPath = compressPath;
         this.fileType = fileType;
-        this.idInt = idInt;
+        this.idLong = idLong;
+    }
+
+    public SelectFileEntity(boolean isSelected, String originalPath, String compressPath, FileType fileType, long idLong, String durationTime) {
+        this.isSelected = isSelected;
+        this.originalPath = originalPath;
+        this.compressPath = compressPath;
+        this.fileType = fileType;
+        this.idLong = idLong;
         this.durationTime = durationTime;
     }
 
@@ -73,12 +85,12 @@ public class SelectFileEntity implements Parcelable {
         this.fileType = fileType;
     }
 
-    public int getIdInt() {
-        return idInt;
+    public long getIdLong() {
+        return idLong;
     }
 
-    public void setIdInt(int idInt) {
-        this.idInt = idInt;
+    public void setIdLong(int idInt) {
+        this.idLong = idInt;
     }
 
     public int getSelectIndex() {
@@ -97,8 +109,12 @@ public class SelectFileEntity implements Parcelable {
         this.durationTime = durationTime;
     }
 
-    public static Creator<SelectFileEntity> getCREATOR() {
-        return CREATOR;
+    public String getThumbnailPath() {
+        return thumbnailPath;
+    }
+
+    public void setThumbnailPath(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
     }
 
     @Override
@@ -106,11 +122,14 @@ public class SelectFileEntity implements Parcelable {
         return "SelectFileEntity{" +
                 "isSelected=" + isSelected +
                 ", originalPath='" + originalPath + '\'' +
+                ", thumbnailPath='" + thumbnailPath + '\'' +
                 ", compressPath='" + compressPath + '\'' +
                 ", fileType=" + fileType +
+                ", idLong=" + idLong +
+                ", selectIndex=" + selectIndex +
+                ", durationTime='" + durationTime + '\'' +
                 '}';
     }
-
 
     @Override
     public int describeContents() {
@@ -121,9 +140,10 @@ public class SelectFileEntity implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte(this.isSelected ? (byte) 1 : (byte) 0);
         dest.writeString(this.originalPath);
+        dest.writeString(this.thumbnailPath);
         dest.writeString(this.compressPath);
         dest.writeInt(this.fileType == null ? -1 : this.fileType.ordinal());
-        dest.writeInt(this.idInt);
+        dest.writeLong(this.idLong);
         dest.writeInt(this.selectIndex);
         dest.writeString(this.durationTime);
     }
@@ -131,10 +151,11 @@ public class SelectFileEntity implements Parcelable {
     protected SelectFileEntity(Parcel in) {
         this.isSelected = in.readByte() != 0;
         this.originalPath = in.readString();
+        this.thumbnailPath = in.readString();
         this.compressPath = in.readString();
         int tmpFileType = in.readInt();
         this.fileType = tmpFileType == -1 ? null : FileType.values()[tmpFileType];
-        this.idInt = in.readInt();
+        this.idLong = in.readLong();
         this.selectIndex = in.readInt();
         this.durationTime = in.readString();
     }

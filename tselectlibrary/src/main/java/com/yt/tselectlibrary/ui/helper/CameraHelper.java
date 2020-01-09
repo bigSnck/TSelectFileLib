@@ -81,7 +81,13 @@ public class CameraHelper {
             if (photoUri != null) {
                 captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                mFragment.get().startActivityForResult(captureIntent, requestCode);
+                if (mFragment == null) {
+                    mContext.get().startActivityForResult(captureIntent, requestCode);
+
+                }else {
+                    mFragment.get().startActivityForResult(captureIntent, requestCode);
+
+                }
             }
         }
     }
@@ -116,14 +122,20 @@ public class CameraHelper {
             }
 
 
-            Log.i("AA","哔哔"+photoUri.toString());
+            Log.i("AA", "哔哔" + photoUri.toString());
             mCameraUri = photoUri;
             if (photoUri != null) {
                 captureIntent.addCategory("android.intent.category.DEFAULT");//视频
                 captureIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); // set the video image quality to high
                 captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                mFragment.get().startActivityForResult(captureIntent, requestCode);
+                if (mFragment == null) {
+                    mContext.get().startActivityForResult(captureIntent, requestCode);
+
+                }else {
+                    mFragment.get().startActivityForResult(captureIntent, requestCode);
+
+                }
             }
         }
     }
@@ -140,28 +152,31 @@ public class CameraHelper {
             return mContext.get().getContentResolver().insert(MediaStore.Images.Media.INTERNAL_CONTENT_URI, new ContentValues());
         }
     }
+
     /**
      * 创建保存视频的文件
      */
     private File createVideoFile() throws IOException {
         String videoName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String videoFileName = String.format("video_%s.mp4", videoName);
-        File tempFile=createFile(videoFileName);
+        File tempFile = createFile(videoFileName);
         return tempFile;
 
 
     }
+
     /**
      * 创建保存图片的文件
      */
     private File createImageFile() throws IOException {
         String imageName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = String.format("JPEG_%s.jpg", imageName);
-        File tempFile=createFile(imageFileName);
+        File tempFile = createFile(imageFileName);
         return tempFile;
 
 
     }
+
     private File createFile(String fileNmae) throws IOException {
 
         File storageDir;
@@ -188,8 +203,6 @@ public class CameraHelper {
 
 
     }
-
-
 
 
     public Uri getCurrentPhotoUri() {

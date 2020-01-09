@@ -2,9 +2,9 @@ package com.yt.tselectlibrary.ui;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,17 +15,20 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.contast.FileType;
+import com.yt.tselectlibrary.ui.contast.SelectParms;
 import com.yt.tselectlibrary.ui.event.ClickPreviewImageEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.Locale;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 
@@ -34,12 +37,18 @@ public class PreviewItemFragment extends Fragment {
     private ImageViewTouch mImageViewTouch;
     private ImageView mIvVideoPaly;
     private static final String ARGS_ITEM = "args_item";
-    private SelectFileEntity mSelectFileEntity;
+    private static final String ARGS_PARAM = "args_param";
 
-    public static Fragment newInstance(SelectFileEntity entity) {
+    private SelectFileEntity mSelectFileEntity;
+    private Uri mVideoUri;
+    private SelectParms mSelectParms;
+
+
+    public static Fragment newInstance(SelectFileEntity entity, SelectParms selectParms) {
         PreviewItemFragment fragment = new PreviewItemFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(ARGS_ITEM, entity);
+        bundle.putParcelable(ARGS_PARAM, selectParms);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -64,8 +73,8 @@ public class PreviewItemFragment extends Fragment {
         mIvVideoPaly.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               String  mOriginalPath=mSelectFileEntity.getOriginalPath();
-                if(mOriginalPath.length()>0){
+                String mOriginalPath = mSelectFileEntity.getOriginalPath();
+                if (mOriginalPath.length() > 0) {
                     palyVideo(mOriginalPath);
                 }
 
@@ -81,30 +90,39 @@ public class PreviewItemFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mSelectFileEntity = getArguments().getParcelable(ARGS_ITEM);
+        mSelectParms = getArguments().getParcelable(ARGS_PARAM);
         if (mSelectFileEntity != null) {
+            Glide.with(this)
+                    .load(mSelectFileEntity.getOriginalPath())
 
-            mImageViewTouch.setImageBitmap(BitmapFactory.decodeFile(mSelectFileEntity.getOriginalPath()));
-
+                    .into(mImageViewTouch);
         }
 
-       if( mSelectFileEntity.getFileType()== FileType.IMAGE){
-           mIvVideoPaly.setVisibility(View.GONE);
-       }
-        if( mSelectFileEntity.getFileType()== FileType.VIDEO){
+        if (mSelectFileEntity.getFileType() == FileType.IMAGE) {
+            mIvVideoPaly.setVisibility(View.GONE);
+        }
+        if (mSelectFileEntity.getFileType() == FileType.VIDEO) {
             mIvVideoPaly.setVisibility(View.VISIBLE);
         }
     }
 
-   public void palyVideo(String path){
+    public void palyVideo(String path) {
         ///storage/emulated/0/DCIM/Camera/VID_20190816_124851.mp4
-       Intent intent = new Intent(Intent.ACTION_VIEW);
-       intent.setDataAndType(Uri.fromFile(new File(path)),
-               "application/vnd.android.package-archive");
-       try {
-           startActivity(intent);
-       } catch (ActivityNotFoundException e) {
-           Toast.makeText(getContext(), "这个视频不支持预览", Toast.LENGTH_SHORT).show();
-       }
-   }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= 24) {
+
+            mVideoUri = FileProvider.getUriForFile(getActivity(), mSelectParms.getCaptureStrategy().authority, new File(path));
+            Log.i("AA", "路径=" + mVideoUri.toString()+"::"+mVideoUri.getPath());
+        } else {
+            mVideoUri = Uri.fromFile(new File(path));
+        }
+
+        intent.setDataAndType(mVideoUri,
+                "video/*");
+
+        startActivity(intent);
+
+
+    }
 
 }

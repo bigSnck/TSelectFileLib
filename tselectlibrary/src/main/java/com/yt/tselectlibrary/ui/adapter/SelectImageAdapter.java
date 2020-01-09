@@ -38,7 +38,7 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
         super(context, data, new MultiTypeSupport<SelectFileEntity>() {
             @Override
             public int getLayout(SelectFileEntity item, int postion) {
-                if (item.getIdInt() == -1) {
+                if (item.getIdLong()  == -1) {
                     return R.layout.adapter_photo_capture_item;
                 } else {
                     return R.layout.adapter_selected_image_layout;
@@ -57,7 +57,7 @@ public class SelectImageAdapter extends TBaseAdapter<SelectFileEntity> {
     public void convert(final ViewHolder holder, final SelectFileEntity selectFileEntity) {
 
 
-        if (selectFileEntity.getIdInt() == -1) {//触发拍照按钮
+        if (selectFileEntity.getIdLong()  == -1) {//触发拍照按钮
             TextView itemTvHint = (TextView) holder.getView(R.id.item_tv_hint);
             itemTvHint.setOnClickListener(new View.OnClickListener() {
                 @Override

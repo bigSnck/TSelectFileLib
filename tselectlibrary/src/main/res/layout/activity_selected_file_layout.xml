@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:background="#ffffff"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    <FrameLayout
-        android:id="@+id/s_contanier"
+<merge>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:background="@color/t_check_original_radio_disable"
+        android:background="#ffffff"
         android:layout_height="match_parent"
-        android:layout_weight="1"></FrameLayout>
+        android:orientation="vertical">
+        <FrameLayout
+            android:id="@+id/s_contanier"
+            android:layout_width="match_parent"
+            android:background="@color/t_check_original_radio_disable"
+            android:layout_height="match_parent"
+            android:layout_weight="1"></FrameLayout>
 
 
-    <com.yt.tselectlibrary.ui.widget.SelectBottomView
-        android:id="@+id/s_file_sbv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></com.yt.tselectlibrary.ui.widget.SelectBottomView>
-</LinearLayout>
+        <com.yt.tselectlibrary.ui.widget.SelectBottomView
+            android:id="@+id/s_file_sbv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></com.yt.tselectlibrary.ui.widget.SelectBottomView>
+    </LinearLayout>
+</merge>

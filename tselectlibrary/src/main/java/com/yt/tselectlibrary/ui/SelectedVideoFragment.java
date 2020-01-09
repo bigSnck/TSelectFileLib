@@ -2,7 +2,6 @@ package com.yt.tselectlibrary.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.SelectVideoAdapter;
-import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
 import com.yt.tselectlibrary.ui.bean.SelectFileEntity;
 import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
 import com.yt.tselectlibrary.ui.callback.OnLoadDataCallback;
@@ -32,7 +30,6 @@ import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.helper.CameraHelper;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
-import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,8 +49,7 @@ public class SelectedVideoFragment extends Fragment {
 
     private OnUiSelectResultCallback mUiCallback;
 
-
-    public final int REQUEST_CODE_CAPTURE = 24;
+    private static final int REQUEST_CODE_TAKE_VIDEO = 11;//拍视频
 
     private int mMaxCount; //最多选择多少张图片
 
@@ -64,33 +60,35 @@ public class SelectedVideoFragment extends Fragment {
     private SelectParms mSelectParms;
     private CameraHelper mCameraHelper;
 
-
+    public SelectedVideoFragment(CameraHelper cameraHelper) {
+        mCameraHelper=cameraHelper;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_selected_image_layout, container, false);
 
-
-        Bundle bundle = getArguments();
-        mSelectParms = bundle.getParcelable("data");
-        mMaxCount = mSelectParms.getMaxCount();
-        mIsSingle = mSelectParms.isSingle();//默认是多些
-        mSelectStyle = mSelectParms.getmStyleType();
-        mIsShowCamra = mSelectParms.isShowCamra();
-        mFileType = mSelectParms.getFileType();
-
-        if (mIsSingle) {
-            mMaxCount = 1;
-        }
-
+        initDealIntent();
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
-        mCameraHelper = new CameraHelper(getActivity(), this);
-        mCameraHelper.setCaptureStrategy(mSelectParms.getCaptureStrategy());
+
         initData();
         initAdapter();
 
 
         return mView;
+    }
+
+    private void initDealIntent() {
+        Bundle bundle = getArguments();
+        mSelectParms = bundle.getParcelable("data");
+        mMaxCount = mSelectParms.getMaxCount();
+        mIsSingle = mSelectParms.isSingle();//默认是多些
+        mSelectStyle = mSelectParms.getStyleType();
+        mIsShowCamra = mSelectParms.isShowCamra();
+        mFileType = mSelectParms.getFileType();
+        if (mIsSingle) {
+            mMaxCount = 1;
+        }
     }
 
     private void initData() {
@@ -156,7 +154,7 @@ public class SelectedVideoFragment extends Fragment {
     private void openCapture() {
 
         if (null != mCameraHelper) {
-            mCameraHelper.openCameraVideo(REQUEST_CODE_CAPTURE);
+            mCameraHelper.openCameraVideo(REQUEST_CODE_TAKE_VIDEO);
         }
     }
 
@@ -256,36 +254,11 @@ public class SelectedVideoFragment extends Fragment {
     private boolean isContainer(List<SelectFileEntity> list) {
 
         if (!list.isEmpty()) {
-            if (list.get(0).getIdInt() == -1) {
+            if (list.get(0).getIdLong() == -1) {
                 return true;
             }
         }
         return false;
     }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Log.i("AA", "扫描------------->>1=" + resultCode);
-        if (requestCode == REQUEST_CODE_CAPTURE && resultCode == getActivity().RESULT_OK) {
-
-
-            String path = mCameraHelper.getCurrentPhotoPath();
-
-            //不添加这句新拍的照片在相册里里面是找不到的,相当重要的
-
-            SingleMediaScanner videoScanner = new SingleMediaScanner(getActivity(), new SingleMediaScanner.ScanListener() {
-                @Override
-                public void onScanFinish() {
-                    getActivity().finish();
-                }
-            });
-            videoScanner.insertIntoMediaStore(true, path);
-        }
-    }
-
 
 }

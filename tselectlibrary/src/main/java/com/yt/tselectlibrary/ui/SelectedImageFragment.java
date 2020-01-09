@@ -1,13 +1,8 @@
 package com.yt.tselectlibrary.ui;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
-import android.net.Uri;
+
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.yt.tselectlibrary.R;
 import com.yt.tselectlibrary.ui.adapter.SelectImageAdapter;
-import com.yt.tselectlibrary.ui.bean.CaptureStrategy;
 import com.yt.tselectlibrary.ui.callback.OnNotSelectCallback;
 import com.yt.tselectlibrary.ui.contast.FileType;
 import com.yt.tselectlibrary.ui.callback.OnCameraCallback;
@@ -38,14 +32,13 @@ import com.yt.tselectlibrary.ui.event.PreviewDataEvent;
 import com.yt.tselectlibrary.ui.event.SelectDataEvent;
 import com.yt.tselectlibrary.ui.helper.CameraHelper;
 import com.yt.tselectlibrary.ui.helper.LoadDataHelper;
-import com.yt.tselectlibrary.ui.util.RotateBitmapUtils;
-import com.yt.tselectlibrary.ui.util.SingleMediaScanner;
+
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +65,11 @@ public class SelectedImageFragment extends Fragment {
     private SelectParms mSelectParms;
     private CameraHelper mCameraHelper;
 
+    private static final int REQUEST_CODE_TAKE_PHOTO = 10;//拍照
+
+    public SelectedImageFragment(CameraHelper cameraHelper) {
+        mCameraHelper=cameraHelper;
+    }
 
     @Nullable
     @Override
@@ -79,21 +77,8 @@ public class SelectedImageFragment extends Fragment {
         mView = inflater.inflate(R.layout.fragment_selected_image_layout, container, false);
 
 
-        Bundle bundle = getArguments();
-        mSelectParms = bundle.getParcelable("data");
-        mMaxCount = mSelectParms.getMaxCount();
-        mIsSingle = mSelectParms.isSingle();//默认是多些
-        mSelectStyle = mSelectParms.getmStyleType();
-        mIsShowCamra = mSelectParms.isShowCamra();
-        mFileType = mSelectParms.getFileType();
-        if (mIsSingle) {
-            mMaxCount = 1;
-        }
-
+        initDealIntent();
         mRlv = mView.findViewById(R.id.fragment_rlv_image);
-
-        mCameraHelper = new CameraHelper(getActivity(), this);
-        mCameraHelper.setCaptureStrategy(mSelectParms.getCaptureStrategy());
 
 
         initData();
@@ -101,6 +86,19 @@ public class SelectedImageFragment extends Fragment {
 
 
         return mView;
+    }
+
+    private void initDealIntent() {
+        Bundle bundle = getArguments();
+        mSelectParms = bundle.getParcelable("data");
+        mMaxCount = mSelectParms.getMaxCount();
+        mIsSingle = mSelectParms.isSingle();//默认是多些
+        mSelectStyle = mSelectParms.getStyleType();
+        mIsShowCamra = mSelectParms.isShowCamra();
+        mFileType = mSelectParms.getFileType();
+        if (mIsSingle) {
+            mMaxCount = 1;
+        }
     }
 
     private void initData() {
@@ -166,7 +164,7 @@ public class SelectedImageFragment extends Fragment {
     private void openCapture() {
 
         if (mCameraHelper != null) {
-            mCameraHelper.openCameraImage(REQUEST_CODE_CAPTURE);
+            mCameraHelper.openCameraImage(REQUEST_CODE_TAKE_PHOTO);
         }
     }
 
@@ -267,38 +265,14 @@ public class SelectedImageFragment extends Fragment {
     private boolean isContainer(List<SelectFileEntity> list) {
 
         if (!list.isEmpty()) {
-            if (list.get(0).getIdInt() == -1) {
+            if (list.get(0).getIdLong() == -1) {
                 return true;
             }
         }
         return false;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_CAPTURE && resultCode == getActivity().RESULT_OK) {
-            Uri contentUri = mCameraHelper.getCurrentPhotoUri();
-            String path = mCameraHelper.getCurrentPhotoPath();
-
-            Bitmap bitmap = BitmapFactory.decodeFile(path);
-            RotateBitmapUtils rotateBitmapUtils = new RotateBitmapUtils();//解决部分手机图片旋转问题
-            int degree = rotateBitmapUtils.getBitmapDegree(path);
-            if (degree != 0) {
-                bitmap = rotateBitmapUtils.rotateBitmapByDegree(bitmap, degree);
-            }
-            //刷新图片在手机数据库里面的信息，才能在相册里面查找到
-            SingleMediaScanner imageScanner = new SingleMediaScanner(getActivity(), new SingleMediaScanner.ScanListener() {
-                @Override
-                public void onScanFinish() {
-                    getActivity().finish();
-                }
-            });
-            imageScanner.insertIntoImageStore(bitmap);
-
-        }
-    }
 
 
 }

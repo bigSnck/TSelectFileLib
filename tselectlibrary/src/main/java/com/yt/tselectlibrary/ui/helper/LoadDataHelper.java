@@ -2,6 +2,7 @@ package com.yt.tselectlibrary.ui.helper;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -23,24 +24,31 @@ public class LoadDataHelper {
     // 加载所有的数据，唯一的id，啥值都行
     private static final int LOADER_TYPE_IMAGE = 0x0055;
     private static final int LOADER_TYPE_VIDEO = 0x0056;
-    private OnLoadDataCallback mLoadCallback;
 
+    private OnLoadDataCallback mLoadCallback;
 
     private final String[] IMAGE_PROJECTION = {
             MediaStore.Images.Media.DATA,
             MediaStore.Images.Media.DATE_ADDED,
-            MediaStore.Images.Media.MIME_TYPE,
-            MediaStore.Images.Media.SIZE,
             MediaStore.Images.Media._ID};
 
     private final String[] VIDEO_PROJECTION = {
             MediaStore.Video.Media.DATA,
             MediaStore.Video.Media.DATE_ADDED,
-            MediaStore.Video.Media.MIME_TYPE,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media._ID,
             MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media._ID,
+
     };
+
+    private final String[] VIDEO_Thumbnails_Array = {
+            MediaStore.Video.Thumbnails.DATA,
+            MediaStore.Video.Thumbnails.VIDEO_ID,
+    };
+    private final String[] IMAGE_Thumbnails_Array = {
+            MediaStore.Images.Thumbnails.DATA,
+            MediaStore.Images.Thumbnails.IMAGE_ID,
+    };
+
 
     public static LoadDataHelper getInstance() {
 
@@ -71,6 +79,31 @@ public class LoadDataHelper {
         }
     }
 
+    /**
+     * 根据id获取缩略图
+     *
+     * @param activity
+     */
+    public String getLoadImageById(final Activity activity, long id) {
+
+        String mImageThumbnailPath = getImageSystemThumbnail(activity, id);
+
+
+        if (!fileIsExists(mImageThumbnailPath)) {
+
+            return mImageThumbnailPath;
+        } else {
+            return mImageThumbnailPath;
+        }
+    }
+
+
+    /**
+     * 获取所有图片
+     *
+     * @param activity
+     * @param fileType
+     */
     public void getLoadImageData(final Activity activity, final FileType fileType) {
         activity.getLoaderManager().initLoader(LOADER_TYPE_IMAGE, null, new LoaderManager.LoaderCallbacks<Cursor>() {
 
@@ -78,7 +111,7 @@ public class LoadDataHelper {
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 CursorLoader cursorLoader = new CursorLoader(activity,
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_PROJECTION,
-                        null,null, IMAGE_PROJECTION[1] + " DESC");
+                        null, null, IMAGE_PROJECTION[1] + " DESC");
                 return cursorLoader;
             }
 
@@ -92,9 +125,7 @@ public class LoadDataHelper {
                     // 不断的遍历循环
                     while (data.moveToNext()) {
                         String path = data.getString(data.getColumnIndexOrThrow(IMAGE_PROJECTION[0]));
-                        // String name = data.getString(data.getColumnIndexOrThrow(IMAGE_PROJECTION[1]));
-                        //long dateTime = data.getLong(data.getColumnIndexOrThrow(IMAGE_PROJECTION[2]));
-                        long IdLong = data.getLong(data.getColumnIndexOrThrow(IMAGE_PROJECTION[4]));
+                        long IdLong = data.getLong(data.getColumnIndexOrThrow(IMAGE_PROJECTION[2]));
 
 
                         // 判断文件是不是存在
@@ -103,6 +134,10 @@ public class LoadDataHelper {
                         }
 
                         SelectFileEntity entity = new SelectFileEntity(false, path, path, fileType, (int) IdLong);
+                      /*String imageThumbnailPath = getImageThumbnail(activity,data,path, IdLong);
+
+                        Log.i("AA","imageThumbnailPath="+imageThumbnailPath);
+                        entity.setThumbnailPath(imageThumbnailPath);*/
                         mLoadCallback.loadData(entity);
 
 
@@ -130,6 +165,12 @@ public class LoadDataHelper {
 
     }
 
+    /**
+     * 获取所有视频
+     *
+     * @param activity
+     * @param fileType
+     */
     public void getLoadVideoData(final Activity activity, final FileType fileType) {
         activity.getLoaderManager().initLoader(LOADER_TYPE_VIDEO, null, new LoaderManager.LoaderCallbacks<Cursor>() {
 
@@ -137,7 +178,8 @@ public class LoadDataHelper {
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 CursorLoader cursorLoader = new CursorLoader(activity,
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI, VIDEO_PROJECTION,
-                        null,null, VIDEO_PROJECTION[1] + " DESC");
+                        null, null, VIDEO_PROJECTION[1] + " DESC");
+
                 return cursorLoader;
             }
 
@@ -149,14 +191,21 @@ public class LoadDataHelper {
                     // 不断的遍历循环
                     while (data.moveToNext()) {
                         String path = data.getString(data.getColumnIndexOrThrow(VIDEO_PROJECTION[0]));
-                        long IdLong = data.getLong(data.getColumnIndexOrThrow(VIDEO_PROJECTION[4]));
-                        long durationTime = data.getLong(data.getColumnIndexOrThrow(VIDEO_PROJECTION[5]));
+                        long IdLong = data.getLong(data.getColumnIndexOrThrow(VIDEO_PROJECTION[3]));
+                        long durationTime = data.getLong(data.getColumnIndexOrThrow(VIDEO_PROJECTION[2]));
                         String durationTimeStr = DateUtils.timeParse(durationTime);
+
+
                         // 判断文件是不是存在
                         if (!pathExist(path)) {
                             continue;
                         }
-                        SelectFileEntity entity = new SelectFileEntity(false, path, path,fileType, (int) IdLong, durationTimeStr);
+                        SelectFileEntity entity = new SelectFileEntity(false, path, path, fileType, IdLong, durationTimeStr);
+
+                        String mThumbnailPath = getVedioThumbnail(activity, data, path, IdLong);//设置缩略图
+                        entity.setThumbnailPath(mThumbnailPath);
+
+
                         mLoadCallback.loadData(entity);
 
 
@@ -188,4 +237,69 @@ public class LoadDataHelper {
     public void setOnLoadDataCallback(OnLoadDataCallback callback) {
         mLoadCallback = callback;
     }
+
+
+    private String getImageSystemThumbnail(Activity activity, long id) {
+        String thumbnail = "";
+        ContentResolver cr = activity.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Images.Thumbnails.DATA
+                },
+                MediaStore.Images.Thumbnails.IMAGE_ID + "=" + id,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
+        }
+        return thumbnail;
+    }
+
+    private String getVideoSystemThumbnail(Activity activity, long id) {
+        String thumbnail = "";
+        ContentResolver cr = activity.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Video.Thumbnails.DATA
+                },
+                MediaStore.Video.Thumbnails.VIDEO_ID + "=" + id,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+            cursor.close();
+        }
+        return thumbnail;
+    }
+
+    public String getVedioThumbnail(Activity activity, Cursor cursor, String path, long id) {
+        String thumbnailPath = getVideoSystemThumbnail(activity, id);
+
+        if (!fileIsExists(thumbnailPath)) {
+
+            return path;
+        } else {
+            return thumbnailPath;
+        }
+    }
+
+    //判断文件是否存在
+    public boolean fileIsExists(String strFile) {
+        try {
+            File f = new File(strFile);
+            if (!f.exists()) {
+                return false;
+            }
+
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 }

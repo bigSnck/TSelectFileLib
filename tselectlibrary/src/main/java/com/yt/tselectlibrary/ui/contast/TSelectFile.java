@@ -1,5 +1,6 @@
 package com.yt.tselectlibrary.ui.contast;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -13,15 +14,15 @@ import com.yt.tselectlibrary.ui.callback.OnResultCallback;
 public class TSelectFile {
     private int mMaxCount; //最多选择多少张图片
     private FileType mFileType = FileType.IMAGE;
-    private boolean mIsSingle = false;//默认是多些
+    private boolean mIsSingle ;//默认是多些
     private SelectedStyleType mStyleType = SelectedStyleType.COMMON;
-    private boolean mIsShowCamra=false;//默认不显示拍照
+    private boolean mIsShowCamra;//默认不显示拍照
+    private OperationType mOperationType=OperationType.TakeSelect;//TakePhoto：仅仅拍照 TakeVideo：仅仅拍视频 TakeSelect：选择相册
 
     private CaptureStrategy mCaptureStrategy;
 
     private Context mContext;
 
-    private OnResultCallback mOnResultCallback;
     /**
      * 最多选择多少张图片
      *
@@ -96,31 +97,38 @@ public class TSelectFile {
         return this;
     }
 
+
+    /**
+     * 设置 TakePhoto，TakeVideo，TakeSelect
+     *
+     * @param operationType
+     * @return
+     */
+    public TSelectFile setOperationType(OperationType operationType) {
+        mOperationType=operationType;
+        return this;
+    }
+
+
     public TSelectFile creat(OnResultCallback callback) {
 
         if (null == mContext||null==mCaptureStrategy) {
             throw new NullPointerException();
         }
-        SelectParms selectParms=  new SelectParms(mMaxCount, mIsSingle, mFileType, mStyleType,mIsShowCamra,mCaptureStrategy);
-        Intent intent = new Intent(mContext, SelectedFileActivity.class);
-        intent.putExtra("data",selectParms);
-        mContext.startActivity(intent);
-       // SelectedFileActivity.selectFile(callback)
+        //mMaxCount, mIsSingle, mFileType, mStyleType,mIsShowCamra,mCaptureStrategy,mOperationType
+        SelectParms selectParms=  new SelectParms();
+        selectParms.setMaxCount(mMaxCount);
+        selectParms.setSingle(mIsSingle);
+        selectParms.setFileType(mFileType);
+        selectParms.setShowCamra(mIsShowCamra);
+        selectParms.setCaptureStrategy(mCaptureStrategy);
+        selectParms.setOperationType(mOperationType);
+
+        SelectedFileActivity.selectFile(mContext,selectParms,callback);
         return this;
     }
 
 
-    public TSelectFile SingleTakePhoto(OnResultCallback callback) {
-        mOnResultCallback=callback;
-
-        return this;
-    }
-
-    public TSelectFile SingleTakeVideo(OnResultCallback callback) {
-        mOnResultCallback=callback;
-
-        return this;
-    }
 
 
 }
