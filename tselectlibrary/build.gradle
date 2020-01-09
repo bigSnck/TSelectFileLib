@@ -36,5 +36,5 @@ dependencies {
     implementation 'it.sephiroth.android.library.imagezoom:imagezoom:2.3.0'
 
     implementation 'org.greenrobot:eventbus:3.1.1'
-    
+
 }
