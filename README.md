@@ -129,7 +129,7 @@ new TSelectFile().from(this)
                 });
 ``` 
 ##### 效果图<br>
-<img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
+<img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image1.jpg" width="300" height="500"/> 
   
 #### 更多用法可以查看源码 谢谢！！ <br>
 
