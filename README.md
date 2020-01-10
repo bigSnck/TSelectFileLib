@@ -99,8 +99,9 @@ new TSelectFile().from(this)
  <img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
   #### 选择视频<br>
   ##### 代码 <br>
-   ``` 
- new TSelectFile()
+  
+  ``` 
+  new TSelectFile()
                 .from(this)
                 .setOperationType(OperationType.TakeSelect)//设置选择
                 .setCaptureStrategy(new CaptureStrategy(true, "com.yt.tselectfilelibrary.fileprovider", "test"))//设置路径
@@ -125,7 +126,8 @@ new TSelectFile().from(this)
 
                     }
                 });
-   ``` 
+``` 
 ##### 效果图<br>
 <img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
   #### 更多用法可以查看源码 谢谢！！ <br>
+
