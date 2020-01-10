@@ -19,14 +19,12 @@ public class RotateBitmapUtils {
      */
     public Bitmap rotateBitmapByDegree(Bitmap bm, int degree) {
         Bitmap returnBm = null;
-        Log.i("AA", "扫描------------->>rotateBitmapByDegree=" +1+"::"+degree);
         // 根据旋转角度，生成旋转矩阵
         Matrix matrix = new Matrix();
         matrix.postRotate(degree);
         try {
             // 将原始图片按照旋转矩阵进行旋转，并得到新的图片
             returnBm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
-            Log.i("AA", "扫描------------->>rotateBitmapByDegree=" +2);
         } catch (OutOfMemoryError e) {
         }
         if (returnBm == null) {
@@ -35,9 +33,6 @@ public class RotateBitmapUtils {
         if (bm != returnBm) {
             bm.recycle();
         }
-
-        Log.i("AA", "扫描------------->>rotateBitmapByDegree=" +3);
-
         return returnBm;
     }
 
