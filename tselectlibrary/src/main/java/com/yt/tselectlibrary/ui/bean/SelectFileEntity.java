@@ -51,7 +51,12 @@ public class SelectFileEntity implements Parcelable {
     public SelectFileEntity() {
     }
 
-
+    @Override
+    public String toString() {
+        return "SelectFileEntity{" +
+                "originalPath='" + originalPath + '\'' +
+                '}';
+    }
 
     public boolean isSelected() {
         return isSelected;
@@ -115,20 +120,6 @@ public class SelectFileEntity implements Parcelable {
 
     public void setThumbnailPath(String thumbnailPath) {
         this.thumbnailPath = thumbnailPath;
-    }
-
-    @Override
-    public String toString() {
-        return "SelectFileEntity{" +
-                "isSelected=" + isSelected +
-                ", originalPath='" + originalPath + '\'' +
-                ", thumbnailPath='" + thumbnailPath + '\'' +
-                ", compressPath='" + compressPath + '\'' +
-                ", fileType=" + fileType +
-                ", idLong=" + idLong +
-                ", selectIndex=" + selectIndex +
-                ", durationTime='" + durationTime + '\'' +
-                '}';
     }
 
     @Override
