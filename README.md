@@ -97,8 +97,9 @@ new TSelectFile().from(this)
  ```
  ##### 效果图<br>
  <img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
-  #### 选择视频<br>
-  ##### 代码 <br>
+ 
+ #### 选择视频<br>
+ ##### 代码 <br>
   
   ``` 
   new TSelectFile()
