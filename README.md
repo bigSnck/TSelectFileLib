@@ -42,8 +42,6 @@ new TSelectFile().from(this)
                     }
                 });
 ```
-##### 效果图：<br>
-
 #### 普通录像 <br>
 ##### 代码 <br>
 ```
@@ -69,11 +67,7 @@ new TSelectFile().from(this)
                 });
 
 ```
-##### 效果图<br>
-
-
- 
- #### 选择图片 <br>
+#### 选择图片 <br>
  ##### 代码 <br>
  ``` 
  new TSelectFile().from(this)
@@ -82,7 +76,7 @@ new TSelectFile().from(this)
                   //.setSingle()//设置单选(只选一张)
                   .setIsShowCamra(true)//是否显示相机 true:显示 false:不显示
                   .setSelectMax(9)//最多选择多少张
-                  .setSelectedStyle(SelectedStyleType.COMMON) //普通样式 SelectedStyleType.COMMON: 数字样式：SelectedStyleType.NUMBER
+                  .setSelectedStyle(SelectedStyleType.COMMON) //普通样式 SelectedStyleType.COMMON: 数字SelectedStyleType.NUMBER
                   .setSeletctFileType(FileType.IMAGE)
                   .creat(new OnResultCallback() {
                     @Override
@@ -102,7 +96,7 @@ new TSelectFile().from(this)
                 });
  ```
  ##### 效果图<br>
-
+ <img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
   #### 选择视频<br>
   ##### 代码 <br>
    ``` 
@@ -133,5 +127,5 @@ new TSelectFile().from(this)
                 });
    ``` 
 ##### 效果图<br>
-
+<img src="https://github.com/bigSnck/TSelectFileLib/blob/master/image/image2.jpg" width="300" height="500"/> 
   #### 更多用法可以查看源码 谢谢！！ <br>
